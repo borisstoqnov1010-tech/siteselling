@@ -40,6 +40,11 @@ const chatPanel = document.querySelector("[data-chat-panel]");
 const chatClose = document.querySelector("[data-chat-close]");
 const chatForm = document.querySelector("[data-chat-form]");
 const chatMessages = document.querySelector("[data-chat-messages]");
+const orderForm = document.querySelector("[data-order-form]");
+const orderStatus = document.querySelector("[data-order-status]");
+const ordersPanel = document.querySelector("#ordersPanel");
+const ordersList = document.querySelector("[data-orders-list]");
+const refreshOrdersButton = document.querySelector("[data-refresh-orders]");
 
 function readJson(key, fallback = {}) {
   try {
@@ -364,6 +369,10 @@ function unlockAdmin() {
 
   adminLogin.classList.add("is-hidden");
   adminPanel.classList.remove("is-hidden");
+  if (ordersPanel) {
+    ordersPanel.classList.remove("is-hidden");
+    loadOrders();
+  }
   passwordStatus.textContent = "";
   adminPassword.value = "";
   sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
@@ -376,6 +385,9 @@ function lockAdmin() {
 
   adminLogin.classList.remove("is-hidden");
   adminPanel.classList.add("is-hidden");
+  if (ordersPanel) {
+    ordersPanel.classList.add("is-hidden");
+  }
   showStatus("");
   sessionStorage.removeItem(ADMIN_SESSION_KEY);
 }
@@ -458,6 +470,107 @@ function initChatbot() {
   });
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+async function submitOrder(formElement) {
+  const data = new FormData(formElement);
+  const payload = Object.fromEntries(data.entries());
+  const response = await fetch("orders.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error("Order request failed");
+  }
+
+  return response.json();
+}
+
+async function loadOrders() {
+  if (!ordersList) {
+    return;
+  }
+
+  ordersList.innerHTML = '<p class="empty-orders">Зареждане...</p>';
+
+  try {
+    const response = await fetch(`orders.php?password=${encodeURIComponent(ADMIN_PASSWORD)}&v=${Date.now()}`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("Orders request failed");
+    }
+
+    const data = await response.json();
+    const orders = Array.isArray(data.orders) ? data.orders : [];
+
+    if (orders.length === 0) {
+      ordersList.innerHTML = '<p class="empty-orders">Все още няма заявки.</p>';
+      return;
+    }
+
+    ordersList.innerHTML = orders.map((order) => {
+      const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleString("bg-BG") : "";
+
+      return `
+        <article class="order-card">
+          <h4>${escapeHtml(order.service || "Нова заявка")}</h4>
+          <p><strong>Име:</strong> ${escapeHtml(order.name || "-")}</p>
+          <p><strong>Discord:</strong> ${escapeHtml(order.discord || "-")}</p>
+          <p><strong>Бюджет:</strong> ${escapeHtml(order.budget || "-")}</p>
+          <p><strong>Описание:</strong> ${escapeHtml(order.description || "-")}</p>
+          <p><strong>Дата:</strong> ${escapeHtml(createdAt)}</p>
+        </article>
+      `;
+    }).join("");
+  } catch {
+    ordersList.innerHTML = '<p class="empty-orders">Не успях да заредя заявките. Нужно е PHP хостинг.</p>';
+  }
+}
+
+function initOrders() {
+  if (orderForm) {
+    orderForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (orderStatus) {
+        orderStatus.textContent = "Изпращане...";
+      }
+
+      try {
+        await submitOrder(orderForm);
+        orderForm.reset();
+
+        if (orderStatus) {
+          orderStatus.textContent = "Заявката е изпратена успешно.";
+        }
+      } catch {
+        if (orderStatus) {
+          orderStatus.textContent = "Не успях да изпратя заявката. Пиши директно в Discord.";
+        }
+      }
+    });
+  }
+
+  if (refreshOrdersButton) {
+    refreshOrdersButton.addEventListener("click", () => {
+      loadOrders();
+    });
+  }
+}
+
 async function init() {
   setTheme(localStorage.getItem(THEME_KEY) || "dark");
 
@@ -468,6 +581,7 @@ async function init() {
   });
 
   initChatbot();
+  initOrders();
 
   const sharedState = await loadSharedState();
   const content = sharedState.content;

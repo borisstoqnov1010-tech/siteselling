@@ -17,6 +17,8 @@
 
     <nav class="main-nav" aria-label="Основна навигация">
       <a href="#services">Услуги</a>
+      <a href="#gallery">Галерия</a>
+      <a href="#reviews">Мнения</a>
       <a href="#process">Процес</a>
       <a href="#why">Защо аз</a>
       <a href="#faq">FAQ</a>
@@ -68,6 +70,65 @@
           <code>design: modern</code>
           <code>speed: fast</code>
         </div>
+      </div>
+    </section>
+
+    <section id="gallery" class="section-block muted-section">
+      <div class="section-heading">
+        <p class="eyebrow">Галерия</p>
+        <h2>Preview идеи за бъдещи сайтове</h2>
+        <p>Примерни визии, които показват как може да изглежда един готов проект.</p>
+      </div>
+
+      <div class="gallery-grid">
+        <article class="gallery-card">
+          <div class="gallery-preview server-preview">
+            <span>CS2</span>
+            <strong>Server Hub</strong>
+          </div>
+          <h3>CS 2 landing page</h3>
+          <p>Hero секция, IP адрес, Discord бутон, правила и сървър статус.</p>
+        </article>
+
+        <article class="gallery-card">
+          <div class="gallery-preview minecraft-preview">
+            <span>MC</span>
+            <strong>Realm Site</strong>
+          </div>
+          <h3>Minecraft community</h3>
+          <p>Режими, снимки, правила, join секция и информация за играчите.</p>
+        </article>
+
+        <article class="gallery-card">
+          <div class="gallery-preview custom-preview">
+            <span>WEB</span>
+            <strong>Custom Brand</strong>
+          </div>
+          <h3>Custom project</h3>
+          <p>Портфолио, бизнес сайт или online presence с уникална структура.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="reviews" class="section-block">
+      <div class="section-heading">
+        <p class="eyebrow">Мнения</p>
+        <h2>Какво казват клиентите</h2>
+      </div>
+
+      <div class="reviews-grid">
+        <article class="review-card">
+          <p>“Сайтът стана бързо и изглежда много по-сериозно от стария ни Discord invite.”</p>
+          <strong>CS 2 клиент</strong>
+        </article>
+        <article class="review-card">
+          <p>“Хареса ми, че работи добре на телефон и всичко е подредено ясно.”</p>
+          <strong>Minecraft проект</strong>
+        </article>
+        <article class="review-card">
+          <p>“Получих точния стил, който исках, плюс лесен начин хората да поръчват.”</p>
+          <strong>Custom сайт</strong>
+        </article>
       </div>
     </section>
 
@@ -192,6 +253,44 @@
         <h2>Направи проекта си да изглежда по-сериозно.</h2>
       </div>
       <a href="https://discord.gg/sSkQC2UmkY" class="btn" target="_blank" rel="noopener">Поръчай в Discord</a>
+    </section>
+
+    <section id="order" class="section-block order-section">
+      <div class="section-heading">
+        <p class="eyebrow">Заявка</p>
+        <h2>Изпрати кратка поръчка</h2>
+        <p>Заявката ще се запази в admin панела, за да не се губи информацията.</p>
+      </div>
+
+      <form class="order-form" data-order-form>
+        <label>
+          Име
+          <input type="text" name="name" placeholder="Твоето име" required>
+        </label>
+        <label>
+          Discord
+          <input type="text" name="discord" placeholder="username#0000 или @username" required>
+        </label>
+        <label>
+          Тип сайт
+          <select name="service" required>
+            <option value="">Избери пакет</option>
+            <option value="CS 2 Server">CS 2 Server</option>
+            <option value="Minecraft Server">Minecraft Server</option>
+            <option value="Сайт по избор">Сайт по избор</option>
+          </select>
+        </label>
+        <label>
+          Бюджет
+          <input type="text" name="budget" placeholder="Например: 10 €">
+        </label>
+        <label class="wide-field">
+          Описание
+          <textarea name="description" rows="4" placeholder="Какво искаш да има в сайта?" required></textarea>
+        </label>
+        <button type="submit">Изпрати заявка</button>
+        <p class="order-status" data-order-status aria-live="polite"></p>
+      </form>
     </section>
   </main>
 
