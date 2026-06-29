@@ -1,6 +1,7 @@
 const STORAGE_KEY = "boris-web-studio-discounts";
 const CONTENT_KEY = "boris-web-studio-content";
 const THEME_KEY = "boris-web-studio-theme";
+const REMOTE_SETTINGS_URL = "settings.php";
 const ADMIN_PASSWORD = "kuchki55";
 const ADMIN_SESSION_KEY = "boris-web-studio-admin-unlocked";
 const SERVICES = ["cs2", "minecraft", "custom"];
@@ -41,6 +42,55 @@ function readJson(key, fallback = {}) {
   } catch {
     return fallback;
   }
+}
+
+async function loadSharedState() {
+  try {
+    const response = await fetch(`${REMOTE_SETTINGS_URL}?v=${Date.now()}`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("Settings request failed");
+    }
+
+    const data = await response.json();
+
+    return {
+      content: {
+        ...defaultContent,
+        ...(data.content || {}),
+      },
+      discounts: data.discounts || {},
+      isShared: true,
+    };
+  } catch {
+    return {
+      content: getContent(),
+      discounts: loadDiscounts(),
+      isShared: false,
+    };
+  }
+}
+
+async function saveSharedState(content, discounts) {
+  const response = await fetch(REMOTE_SETTINGS_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      password: ADMIN_PASSWORD,
+      content,
+      discounts,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Shared save failed");
+  }
+
+  return response.json();
 }
 
 function clampDiscount(value) {
@@ -336,87 +386,108 @@ function resetDiscounts() {
   }, {});
 }
 
-setTheme(localStorage.getItem(THEME_KEY) || "dark");
+async function init() {
+  setTheme(localStorage.getItem(THEME_KEY) || "dark");
 
-themeButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+  themeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+    });
   });
-});
 
-const content = getContent();
-const savedDiscounts = loadDiscounts();
-applyContent(content);
-fillContentForm(content);
-fillDiscountForm(savedDiscounts);
-applyDiscounts(savedDiscounts);
-updateDurationFields();
-updateAdminPreview(savedDiscounts);
+  const sharedState = await loadSharedState();
+  const content = sharedState.content;
+  const savedDiscounts = sharedState.discounts;
 
-if (adminLogin && sessionStorage.getItem(ADMIN_SESSION_KEY) === "true") {
-  unlockAdmin();
+  saveContent(content);
+  saveDiscounts(savedDiscounts);
+  applyContent(content);
+  fillContentForm(content);
+  fillDiscountForm(savedDiscounts);
+  applyDiscounts(savedDiscounts);
+  updateDurationFields();
+  updateAdminPreview(savedDiscounts);
+
+  if (adminLogin && sessionStorage.getItem(ADMIN_SESSION_KEY) === "true") {
+    unlockAdmin();
+  }
+
+  if (adminLogin) {
+    adminLogin.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      if (adminPassword.value === ADMIN_PASSWORD) {
+        unlockAdmin();
+        return;
+      }
+
+      passwordStatus.textContent = "Грешна парола.";
+      adminPassword.value = "";
+      adminPassword.focus();
+    });
+  }
+
+  if (form) {
+    form.addEventListener("input", () => {
+      const draftContent = getContentFromForm();
+      const discounts = getFormDiscounts();
+
+      applyContent(draftContent);
+      updateDurationFields();
+      updateAdminPreview(discounts);
+      applyDiscounts(discounts);
+      showStatus("Преглед преди запазване.");
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const nextContent = getContentFromForm();
+      const discounts = getFormDiscounts();
+
+      applyContent(nextContent);
+      fillContentForm(nextContent);
+      fillDiscountForm(discounts);
+      updateDurationFields();
+      updateAdminPreview(discounts);
+      applyDiscounts(discounts);
+      saveContent(nextContent);
+      saveDiscounts(discounts);
+
+      try {
+        await saveSharedState(nextContent, discounts);
+        showStatus("Запазено за всички посетители.");
+      } catch {
+        showStatus("Запазено само при теб. Качи сайта на PHP хостинг, за да се вижда от всички.");
+      }
+    });
+  }
+
+  if (resetButton) {
+    resetButton.addEventListener("click", async () => {
+      const discounts = resetDiscounts();
+      const currentContent = getContentFromForm();
+
+      fillDiscountForm(discounts);
+      updateDurationFields();
+      updateAdminPreview(discounts);
+      applyDiscounts(discounts);
+      saveDiscounts(discounts);
+
+      try {
+        await saveSharedState(currentContent, discounts);
+        showStatus("Отстъпките са изчистени за всички.");
+      } catch {
+        showStatus("Отстъпките са изчистени само при теб.");
+      }
+    });
+  }
+
+  if (lockAdminButton) {
+    lockAdminButton.addEventListener("click", () => {
+      lockAdmin();
+    });
+  }
 }
 
-if (adminLogin) {
-  adminLogin.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    if (adminPassword.value === ADMIN_PASSWORD) {
-      unlockAdmin();
-      return;
-    }
-
-    passwordStatus.textContent = "Грешна парола.";
-    adminPassword.value = "";
-    adminPassword.focus();
-  });
-}
-
-if (form) {
-  form.addEventListener("input", () => {
-    const draftContent = getContentFromForm();
-    const discounts = getFormDiscounts();
-
-    applyContent(draftContent);
-    updateDurationFields();
-    updateAdminPreview(discounts);
-    applyDiscounts(discounts);
-    showStatus("Преглед преди запазване.");
-  });
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const nextContent = getContentFromForm();
-    const discounts = getFormDiscounts();
-
-    applyContent(nextContent);
-    fillContentForm(nextContent);
-    fillDiscountForm(discounts);
-    updateDurationFields();
-    updateAdminPreview(discounts);
-    applyDiscounts(discounts);
-    saveContent(nextContent);
-    saveDiscounts(discounts);
-    showStatus("Текстовете, цените и отстъпките са запазени.");
-  });
-}
-
-if (resetButton) {
-  resetButton.addEventListener("click", () => {
-    const discounts = resetDiscounts();
-
-    fillDiscountForm(discounts);
-    updateDurationFields();
-    updateAdminPreview(discounts);
-    applyDiscounts(discounts);
-    saveDiscounts(discounts);
-    showStatus("Отстъпките са изчистени.");
-  });
-}
-
-if (lockAdminButton) {
-  lockAdminButton.addEventListener("click", () => {
-    lockAdmin();
-  });
-}
+init();
