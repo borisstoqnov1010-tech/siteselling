@@ -195,6 +195,33 @@
     </section>
   </main>
 
+  <section class="chatbot" aria-label="AI chatbot">
+    <button class="chatbot-toggle" type="button" data-chat-toggle aria-expanded="false">
+      AI
+    </button>
+
+    <div class="chatbot-panel is-hidden" data-chat-panel>
+      <div class="chatbot-header">
+        <div>
+          <strong>AI помощник</strong>
+          <span>Питай за сайт, цена или поръчка</span>
+        </div>
+        <button type="button" data-chat-close aria-label="Затвори">×</button>
+      </div>
+
+      <div class="chatbot-messages" data-chat-messages>
+        <div class="chat-message bot">
+          Здрасти! Питай ме за пакетите, срокове, отстъпки или как да поръчаш сайт.
+        </div>
+      </div>
+
+      <form class="chatbot-form" data-chat-form>
+        <input type="text" name="message" autocomplete="off" placeholder="Напиши въпрос..." required>
+        <button type="submit">Изпрати</button>
+      </form>
+    </div>
+  </section>
+
   <footer>
     <span>Boris Web Studio</span>
     <span>© 2026 Всички права запазени.</span>

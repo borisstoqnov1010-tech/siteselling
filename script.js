@@ -35,6 +35,11 @@ const statusText = document.querySelector("#adminStatus");
 const serviceCards = Array.from(document.querySelectorAll(".service-card"));
 const adminItems = Array.from(document.querySelectorAll(".discount-item"));
 const themeButtons = Array.from(document.querySelectorAll("[data-theme-toggle]"));
+const chatToggle = document.querySelector("[data-chat-toggle]");
+const chatPanel = document.querySelector("[data-chat-panel]");
+const chatClose = document.querySelector("[data-chat-close]");
+const chatForm = document.querySelector("[data-chat-form]");
+const chatMessages = document.querySelector("[data-chat-messages]");
 
 function readJson(key, fallback = {}) {
   try {
@@ -386,6 +391,73 @@ function resetDiscounts() {
   }, {});
 }
 
+function addChatMessage(text, type = "bot") {
+  if (!chatMessages) {
+    return;
+  }
+
+  const message = document.createElement("div");
+  message.className = `chat-message ${type}`;
+  message.textContent = text;
+  chatMessages.appendChild(message);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function initChatbot() {
+  if (!chatToggle || !chatPanel || !chatForm) {
+    return;
+  }
+
+  chatToggle.addEventListener("click", () => {
+    const isOpening = chatPanel.classList.contains("is-hidden");
+    chatPanel.classList.toggle("is-hidden", !isOpening);
+    chatToggle.setAttribute("aria-expanded", String(isOpening));
+  });
+
+  if (chatClose) {
+    chatClose.addEventListener("click", () => {
+      chatPanel.classList.add("is-hidden");
+      chatToggle.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  chatForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const input = chatForm.elements.message;
+    const text = String(input.value || "").trim();
+
+    if (!text) {
+      return;
+    }
+
+    addChatMessage(text, "user");
+    input.value = "";
+    addChatMessage("Мисля...", "bot");
+
+    const thinkingMessage = chatMessages.lastElementChild;
+
+    try {
+      const response = await fetch("chat.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: text }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Chat request failed");
+      }
+
+      const data = await response.json();
+      thinkingMessage.textContent = data.reply || "Не успях да отговоря в момента.";
+    } catch {
+      thinkingMessage.textContent = "Не успях да се свържа с AI. Пиши директно в Discord за най-бърз отговор.";
+    }
+  });
+}
+
 async function init() {
   setTheme(localStorage.getItem(THEME_KEY) || "dark");
 
@@ -394,6 +466,8 @@ async function init() {
       setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
     });
   });
+
+  initChatbot();
 
   const sharedState = await loadSharedState();
   const content = sharedState.content;
