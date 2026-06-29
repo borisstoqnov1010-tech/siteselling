@@ -8,18 +8,25 @@
   <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
-  <header>
-    <div class="logo">Boris Web Studio</div>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Boris Web Studio">
+      <img src="favicon.png" alt="" class="brand-mark">
+      <span>Boris Web Studio</span>
+    </a>
 
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="index.html#services">Services</a>
+    <nav class="main-nav" aria-label="Admin навигация">
+      <a href="index.html">Сайт</a>
+      <a href="index.html#services">Услуги</a>
     </nav>
   </header>
 
   <main class="admin-page">
-    <section id="admin">
-      <h2>Admin панел</h2>
+    <section id="admin" class="section-block">
+      <div class="section-heading">
+        <p class="eyebrow">Защитена зона</p>
+        <h2>Admin панел</h2>
+        <p>Управлявай отстъпките и срока им. Промяната се вижда веднага като preview.</p>
+      </div>
 
       <form class="admin-login" id="adminLogin">
         <h3>Вход за админ</h3>
@@ -32,14 +39,21 @@
       </form>
 
       <div class="admin-panel is-hidden" id="adminPanel">
-        <div class="admin-intro">
-          <h3>Отстъпки</h3>
-          <p>Въведи процент отстъпка за всяка услуга. Цените се обновяват на сайта и се запазват в този браузър.</p>
-        </div>
+        <aside class="admin-intro">
+          <div class="admin-badge">Live pricing</div>
+          <h3>Отстъпки и срокове</h3>
+          <p>
+            Задай процент, избери срок и виж новата цена преди да запазиш.
+            Настройките се пазят в този браузър и се показват на главния сайт.
+          </p>
+        </aside>
 
         <form class="discount-form" id="discountForm">
           <div class="discount-item" data-admin-service="cs2" data-admin-price="4">
-            <h4>CS 2</h4>
+            <div class="discount-header">
+              <h4>CS 2 Server</h4>
+              <span>Base 4 €</span>
+            </div>
             <label>
               Отстъпка %
               <input type="number" min="0" max="100" step="1" name="cs2" value="0">
@@ -59,7 +73,10 @@
           </div>
 
           <div class="discount-item" data-admin-service="minecraft" data-admin-price="6">
-            <h4>Minecraft Server</h4>
+            <div class="discount-header">
+              <h4>Minecraft Server</h4>
+              <span>Base 6 €</span>
+            </div>
             <label>
               Отстъпка %
               <input type="number" min="0" max="100" step="1" name="minecraft" value="0">
@@ -79,7 +96,10 @@
           </div>
 
           <div class="discount-item" data-admin-service="custom" data-admin-price="10">
-            <h4>Сайт по избор</h4>
+            <div class="discount-header">
+              <h4>Сайт по избор</h4>
+              <span>Base 10 €</span>
+            </div>
             <label>
               Отстъпка %
               <input type="number" min="0" max="100" step="1" name="custom" value="0">

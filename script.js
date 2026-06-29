@@ -1,6 +1,7 @@
 const STORAGE_KEY = "boris-web-studio-discounts";
 const ADMIN_PASSWORD = "kuchki55";
 const ADMIN_SESSION_KEY = "boris-web-studio-admin-unlocked";
+const SERVICES = ["cs2", "minecraft", "custom"];
 
 const adminLogin = document.querySelector("#adminLogin");
 const adminPassword = document.querySelector("#adminPassword");
@@ -68,20 +69,14 @@ function getDurationFromForm(service, data) {
 function getFormDiscounts() {
   const data = new FormData(form);
 
-  return {
-    cs2: {
-      discount: clampDiscount(data.get("cs2")),
-      duration: getDurationFromForm("cs2", data),
-    },
-    minecraft: {
-      discount: clampDiscount(data.get("minecraft")),
-      duration: getDurationFromForm("minecraft", data),
-    },
-    custom: {
-      discount: clampDiscount(data.get("custom")),
-      duration: getDurationFromForm("custom", data),
-    },
-  };
+  return SERVICES.reduce((discounts, service) => {
+    discounts[service] = {
+      discount: clampDiscount(data.get(service)),
+      duration: getDurationFromForm(service, data),
+    };
+
+    return discounts;
+  }, {});
 }
 
 function fillForm(discounts) {
@@ -89,15 +84,14 @@ function fillForm(discounts) {
     return;
   }
 
-  ["cs2", "minecraft", "custom"].forEach((service) => {
+  SERVICES.forEach((service) => {
     const settings = getServiceSettings(discounts, service);
+    const durationSelect = form.elements[`${service}Duration`];
+    const customDuration = form.elements[`${service}CustomDuration`];
 
     if (form.elements[service]) {
       form.elements[service].value = settings.discount;
     }
-
-    const durationSelect = form.elements[`${service}Duration`];
-    const customDuration = form.elements[`${service}CustomDuration`];
 
     if (!durationSelect || !customDuration) {
       return;
@@ -137,10 +131,15 @@ function applyDiscounts(discounts) {
     const discountNote = card.querySelector("[data-discount-note]");
     const durationText = settings.duration ? ` за ${settings.duration}` : "";
 
-    priceOutput.textContent = formatPrice(finalPrice);
-    discountNote.textContent = settings.discount > 0
-      ? `-${settings.discount}% отстъпка${durationText}, стара цена ${formatPrice(basePrice)}`
-      : "";
+    if (priceOutput) {
+      priceOutput.textContent = formatPrice(finalPrice);
+    }
+
+    if (discountNote) {
+      discountNote.textContent = settings.discount > 0
+        ? `-${settings.discount}% отстъпка${durationText}, стара цена ${formatPrice(basePrice)}`
+        : "";
+    }
   });
 }
 
@@ -149,7 +148,7 @@ function updateDurationFields() {
     return;
   }
 
-  ["cs2", "minecraft", "custom"].forEach((service) => {
+  SERVICES.forEach((service) => {
     const durationSelect = form.elements[`${service}Duration`];
     const customDuration = form.elements[`${service}CustomDuration`];
 
@@ -169,6 +168,10 @@ function updateAdminPreview(discounts) {
     const finalPrice = getDiscountedPrice(basePrice, settings.discount);
     const preview = item.querySelector("[data-price-preview]");
     const durationText = settings.duration ? `, срок: ${settings.duration}` : "";
+
+    if (!preview) {
+      return;
+    }
 
     preview.textContent = settings.discount > 0
       ? `Нова цена: ${formatPrice(finalPrice)} вместо ${formatPrice(basePrice)} (${settings.discount}% отстъпка${durationText})`
@@ -205,6 +208,17 @@ function lockAdmin() {
   sessionStorage.removeItem(ADMIN_SESSION_KEY);
 }
 
+function resetDiscounts() {
+  return SERVICES.reduce((discounts, service) => {
+    discounts[service] = {
+      discount: 0,
+      duration: "",
+    };
+
+    return discounts;
+  }, {});
+}
+
 const savedDiscounts = loadDiscounts();
 fillForm(savedDiscounts);
 applyDiscounts(savedDiscounts);
@@ -233,6 +247,7 @@ if (adminLogin) {
 if (form) {
   form.addEventListener("input", () => {
     const discounts = getFormDiscounts();
+
     updateDurationFields();
     updateAdminPreview(discounts);
     applyDiscounts(discounts);
@@ -241,6 +256,7 @@ if (form) {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+
     const discounts = getFormDiscounts();
     fillForm(discounts);
     updateDurationFields();
@@ -253,20 +269,7 @@ if (form) {
 
 if (resetButton) {
   resetButton.addEventListener("click", () => {
-    const discounts = {
-      cs2: {
-        discount: 0,
-        duration: "",
-      },
-      minecraft: {
-        discount: 0,
-        duration: "",
-      },
-      custom: {
-        discount: 0,
-        duration: "",
-      },
-    };
+    const discounts = resetDiscounts();
 
     fillForm(discounts);
     updateDurationFields();

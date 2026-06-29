@@ -4,96 +4,171 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Boris Web Studio</title>
+  <meta name="description" content="Модерни уебсайтове за гейминг сървъри, лични проекти и онлайн магазини.">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
-  <header>
-    <div class="logo">Boris Web Studio</div>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="Boris Web Studio">
+      <img src="favicon.png" alt="" class="brand-mark">
+      <span>Boris Web Studio</span>
+    </a>
 
-    <nav>
-      <a href="#home">Home</a>
-      <a href="#services">Services</a>
+    <nav class="main-nav" aria-label="Основна навигация">
+      <a href="#services">Услуги</a>
+      <a href="#process">Процес</a>
+      <a href="#why">Защо аз</a>
+      <a href="#contact">Контакт</a>
     </nav>
   </header>
 
-  <section class="hero" id="home">
-    <div>
-      <h1>Професионални уебсайтове</h1>
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-content">
+        <p class="eyebrow">Бързи, модерни и зелени уебсайтове</p>
+        <h1>Сайт, който изглежда сериозно още от първия клик.</h1>
+        <p class="hero-text">
+          Правя чисти, responsive сайтове за CS 2, Minecraft, лични проекти и малки бизнеси.
+          Получаваш дизайн, структура и готов линк за поръчки през Discord.
+        </p>
 
-      <p>
-        Изработвам стилни сайтове за игри, онлайн магазини и лични проекти.
-      </p>
+        <div class="hero-actions">
+          <a href="#services" class="btn">Виж пакетите</a>
+          <a href="https://discord.gg/sSkQC2UmkY" class="btn secondary-btn" target="_blank" rel="noopener">Пиши в Discord</a>
+        </div>
 
-      <a href="#services" class="btn">
-        Виж услугите, които предлагам
-      </a>
-    </div>
-  </section>
-
-  <section id="services">
-    <h2>Услуги</h2>
-
-    <div class="cards">
-      <div class="card service-card" data-service="cs2" data-price="4">
-        <h3>CS 2</h3>
-        <p>Сайт за CS 2 сървър</p>
-        <span class="price" data-price-output>4 €</span>
-        <small class="discount-note" data-discount-note></small>
-
-        <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">
-          Поръчай
-        </a>
+        <div class="hero-stats" aria-label="Предимства">
+          <div>
+            <strong>24/7</strong>
+            <span>достъпен сайт</span>
+          </div>
+          <div>
+            <strong>100%</strong>
+            <span>mobile friendly</span>
+          </div>
+          <div>
+            <strong>3</strong>
+            <span>готови пакета</span>
+          </div>
+        </div>
       </div>
 
-      <div class="card service-card" data-service="minecraft" data-price="6">
-        <h3>Minecraft Server</h3>
-        <p>Сайт за Minecraft сървър</p>
-        <span class="price" data-price-output>6 €</span>
-        <small class="discount-note" data-discount-note></small>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="logo-orbit">
+          <img src="favicon.png" alt="">
+        </div>
+        <div class="terminal-card">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <code>&lt;site status="online"&gt;</code>
+          <code>design: modern</code>
+          <code>speed: fast</code>
+        </div>
+      </div>
+    </section>
 
-        <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">
-          Поръчай
-        </a>
+    <section id="services" class="section-block">
+      <div class="section-heading">
+        <p class="eyebrow">Пакети</p>
+        <h2>Избери сайт според проекта си</h2>
+        <p>Цените могат да се обновяват от admin панела, включително временни отстъпки.</p>
       </div>
 
-      <div class="card service-card" data-service="custom" data-price="10">
-        <h3>Сайт по избор</h3>
-        <p>Персонализиран сайт по ваш избор</p>
-        <span class="price" data-price-output>10 €</span>
-        <small class="discount-note" data-discount-note></small>
+      <div class="cards service-grid">
+        <article class="card service-card featured-card" data-service="cs2" data-price="4">
+          <div class="card-topline">Gaming пакет</div>
+          <h3>CS 2 Server</h3>
+          <p>Страница за CS 2 сървър с IP, Discord, правила, статус и силна първа визия.</p>
+          <span class="price" data-price-output>4 €</span>
+          <small class="discount-note" data-discount-note></small>
+          <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">Поръчай</a>
+        </article>
 
-        <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">
-          Поръчай
-        </a>
+        <article class="card service-card" data-service="minecraft" data-price="6">
+          <div class="card-topline">Community пакет</div>
+          <h3>Minecraft Server</h3>
+          <p>Сайт за Minecraft сървър с секции за режимите, снимки, правила и join бутон.</p>
+          <span class="price" data-price-output>6 €</span>
+          <small class="discount-note" data-discount-note></small>
+          <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">Поръчай</a>
+        </article>
+
+        <article class="card service-card" data-service="custom" data-price="10">
+          <div class="card-topline">Custom пакет</div>
+          <h3>Сайт по избор</h3>
+          <p>Персонален сайт според твоята идея: портфолио, магазин, landing page или проект.</p>
+          <span class="price" data-price-output>10 €</span>
+          <small class="discount-note" data-discount-note></small>
+          <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">Поръчай</a>
+        </article>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section id="portfolio">
-    <h2>Защо да избереш мен?</h2>
-
-    <div class="cards">
-      <div class="card">
-        <h3>Бързо</h3>
-        <p>Сайтът ще е готов до няколко дни.</p>
+    <section id="process" class="section-block muted-section">
+      <div class="section-heading">
+        <p class="eyebrow">Процес</p>
+        <h2>Лесно от идея до готов сайт</h2>
       </div>
 
-      <div class="card">
-        <h3>Модерен дизайн</h3>
-        <p>Красив и responsive дизайн.</p>
+      <div class="steps">
+        <article>
+          <span>01</span>
+          <h3>Пишеш ми</h3>
+          <p>Казваш какъв сайт искаш, какви секции ти трябват и какъв стил харесваш.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Правя дизайна</h3>
+          <p>Подреждам страницата, цветовете, бутоните и съдържанието да изглеждат професионално.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Получаваш готово</h3>
+          <p>Сайтът е responsive, подреден и готов да го показваш на хората си.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="why" class="section-block">
+      <div class="section-heading">
+        <p class="eyebrow">Предимства</p>
+        <h2>Защо да избереш Boris Web Studio?</h2>
       </div>
 
-      <div class="card">
-        <h3>Mobile Friendly</h3>
-        <p>Ще работи на телефон и компютър.</p>
+      <div class="feature-grid">
+        <article>
+          <h3>Бърза изработка</h3>
+          <p>Не чакаш седмици. Получаваш чист сайт, направен за твоя проект.</p>
+        </article>
+        <article>
+          <h3>Модерен стил</h3>
+          <p>Тъмен зелен дизайн, ясни секции, добри бутони и силно първо впечатление.</p>
+        </article>
+        <article>
+          <h3>Работи на телефон</h3>
+          <p>Страницата се адаптира за телефон, таблет и компютър без странни размествания.</p>
+        </article>
+        <article>
+          <h3>Лесни промени</h3>
+          <p>Admin страницата позволява да сменяш отстъпки и срокове без да пипаш кода.</p>
+        </article>
       </div>
-    </div>
-  </section>
+    </section>
+
+    <section id="contact" class="cta-section">
+      <div>
+        <p class="eyebrow">Готов ли си?</p>
+        <h2>Направи проекта си да изглежда по-сериозно.</h2>
+      </div>
+      <a href="https://discord.gg/sSkQC2UmkY" class="btn" target="_blank" rel="noopener">Поръчай в Discord</a>
+    </section>
+  </main>
 
   <footer>
-    Избирайте мен Борис! :)<br>
-    © 2026 Boris Web Studio
+    <span>Boris Web Studio</span>
+    <span>© 2026 Всички права запазени.</span>
   </footer>
 
   <script src="script.js"></script>
