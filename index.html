@@ -19,16 +19,18 @@
       <a href="#services">Услуги</a>
       <a href="#process">Процес</a>
       <a href="#why">Защо аз</a>
+      <a href="#faq">FAQ</a>
       <a href="#contact">Контакт</a>
+      <button class="theme-toggle" type="button" data-theme-toggle>Светла тема</button>
     </nav>
   </header>
 
   <main>
     <section class="hero" id="home">
       <div class="hero-content">
-        <p class="eyebrow">Бързи, модерни и зелени уебсайтове</p>
-        <h1>Сайт, който изглежда сериозно още от първия клик.</h1>
-        <p class="hero-text">
+        <p class="eyebrow" data-content="heroEyebrow">Бързи, модерни и зелени уебсайтове</p>
+        <h1 data-content="heroTitle">Сайт, който изглежда сериозно още от първия клик.</h1>
+        <p class="hero-text" data-content="heroText">
           Правя чисти, responsive сайтове за CS 2, Minecraft, лични проекти и малки бизнеси.
           Получаваш дизайн, структура и готов линк за поръчки през Discord.
         </p>
@@ -78,27 +80,27 @@
 
       <div class="cards service-grid">
         <article class="card service-card featured-card" data-service="cs2" data-price="4">
-          <div class="card-topline">Gaming пакет</div>
-          <h3>CS 2 Server</h3>
-          <p>Страница за CS 2 сървър с IP, Discord, правила, статус и силна първа визия.</p>
+          <div class="card-topline" data-content="cs2Badge">Gaming пакет</div>
+          <h3 data-content="cs2Title">CS 2 Server</h3>
+          <p data-content="cs2Description">Страница за CS 2 сървър с IP, Discord, правила, статус и силна първа визия.</p>
           <span class="price" data-price-output>4 €</span>
           <small class="discount-note" data-discount-note></small>
           <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">Поръчай</a>
         </article>
 
         <article class="card service-card" data-service="minecraft" data-price="6">
-          <div class="card-topline">Community пакет</div>
-          <h3>Minecraft Server</h3>
-          <p>Сайт за Minecraft сървър с секции за режимите, снимки, правила и join бутон.</p>
+          <div class="card-topline" data-content="minecraftBadge">Community пакет</div>
+          <h3 data-content="minecraftTitle">Minecraft Server</h3>
+          <p data-content="minecraftDescription">Сайт за Minecraft сървър с секции за режимите, снимки, правила и join бутон.</p>
           <span class="price" data-price-output>6 €</span>
           <small class="discount-note" data-discount-note></small>
           <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">Поръчай</a>
         </article>
 
         <article class="card service-card" data-service="custom" data-price="10">
-          <div class="card-topline">Custom пакет</div>
-          <h3>Сайт по избор</h3>
-          <p>Персонален сайт според твоята идея: портфолио, магазин, landing page или проект.</p>
+          <div class="card-topline" data-content="customBadge">Custom пакет</div>
+          <h3 data-content="customTitle">Сайт по избор</h3>
+          <p data-content="customDescription">Персонален сайт според твоята идея: портфолио, магазин, landing page или проект.</p>
           <span class="price" data-price-output>10 €</span>
           <small class="discount-note" data-discount-note></small>
           <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">Поръчай</a>
@@ -154,6 +156,33 @@
           <h3>Лесни промени</h3>
           <p>Admin страницата позволява да сменяш отстъпки и срокове без да пипаш кода.</p>
         </article>
+      </div>
+    </section>
+
+    <section id="faq" class="section-block muted-section">
+      <div class="section-heading">
+        <p class="eyebrow">FAQ</p>
+        <h2>Често задавани въпроси</h2>
+        <p>Най-важното преди да поръчаш сайт.</p>
+      </div>
+
+      <div class="faq-list">
+        <details open>
+          <summary>Колко време отнема изработката?</summary>
+          <p>Обикновено няколко дни, според сложността и колко съдържание трябва да се добави.</p>
+        </details>
+        <details>
+          <summary>Какво трябва да изпратя?</summary>
+          <p>Име на проекта, цветове, текстове, снимки или лого, Discord линк и пример за стил, който харесваш.</p>
+        </details>
+        <details>
+          <summary>Може ли сайтът да работи на телефон?</summary>
+          <p>Да. Дизайнът е responsive и се адаптира за телефон, таблет и компютър.</p>
+        </details>
+        <details>
+          <summary>Може ли после да се правят промени?</summary>
+          <p>Да. Admin страницата позволява да променяш текстове, цени, отстъпки и срокове в този браузър.</p>
+        </details>
       </div>
     </section>
 

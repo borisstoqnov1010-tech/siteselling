@@ -17,6 +17,7 @@
     <nav class="main-nav" aria-label="Admin навигация">
       <a href="index.html">Сайт</a>
       <a href="index.html#services">Услуги</a>
+      <button class="theme-toggle" type="button" data-theme-toggle>Светла тема</button>
     </nav>
   </header>
 
@@ -49,6 +50,80 @@
         </aside>
 
         <form class="discount-form" id="discountForm">
+          <div class="content-editor">
+            <h4>Редакция на текстове и цени</h4>
+
+            <label>
+              Малък текст в hero
+              <input type="text" name="heroEyebrow">
+            </label>
+            <label>
+              Главно заглавие
+              <textarea name="heroTitle" rows="2"></textarea>
+            </label>
+            <label>
+              Описание в hero
+              <textarea name="heroText" rows="3"></textarea>
+            </label>
+
+            <div class="content-grid">
+              <label>
+                CS 2 име
+                <input type="text" name="cs2Title">
+              </label>
+              <label>
+                CS 2 badge
+                <input type="text" name="cs2Badge">
+              </label>
+              <label>
+                CS 2 цена
+                <input type="number" min="0" step="0.5" name="cs2Price">
+              </label>
+              <label class="wide-field">
+                CS 2 описание
+                <textarea name="cs2Description" rows="2"></textarea>
+              </label>
+            </div>
+
+            <div class="content-grid">
+              <label>
+                Minecraft име
+                <input type="text" name="minecraftTitle">
+              </label>
+              <label>
+                Minecraft badge
+                <input type="text" name="minecraftBadge">
+              </label>
+              <label>
+                Minecraft цена
+                <input type="number" min="0" step="0.5" name="minecraftPrice">
+              </label>
+              <label class="wide-field">
+                Minecraft описание
+                <textarea name="minecraftDescription" rows="2"></textarea>
+              </label>
+            </div>
+
+            <div class="content-grid">
+              <label>
+                Custom име
+                <input type="text" name="customTitle">
+              </label>
+              <label>
+                Custom badge
+                <input type="text" name="customBadge">
+              </label>
+              <label>
+                Custom цена
+                <input type="number" min="0" step="0.5" name="customPrice">
+              </label>
+              <label class="wide-field">
+                Custom описание
+                <textarea name="customDescription" rows="2"></textarea>
+              </label>
+            </div>
+          </div>
+
           <div class="discount-item" data-admin-service="cs2" data-admin-price="4">
             <div class="discount-header">
               <h4>CS 2 Server</h4>
