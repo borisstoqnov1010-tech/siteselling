@@ -1,3 +1,6 @@
+Смени целия `style.css` с този:
+
+```css
 *{
   margin:0;
   padding:0;
@@ -7,8 +10,11 @@
 }
 
 body{
-  background:#081c15;
+  background:
+    radial-gradient(circle at top,#14532d 0%,transparent 35%),
+    linear-gradient(180deg,#03140d,#081c15);
   color:white;
+  overflow-x:hidden;
 }
 
 /* HEADER */
@@ -17,17 +23,15 @@ header{
   position:fixed;
   top:0;
   width:100%;
+  padding:20px 8%;
 
   display:flex;
   justify-content:space-between;
   align-items:center;
 
-  padding:20px 8%;
-
-  background:rgba(8,28,21,0.9);
-  backdrop-filter:blur(10px);
-
-  border-bottom:1px solid rgba(34,197,94,0.2);
+  background:rgba(3,20,13,0.85);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(34,197,94,0.25);
 
   z-index:1000;
 }
@@ -36,11 +40,12 @@ header{
   font-size:28px;
   font-weight:bold;
   color:#22c55e;
+  text-shadow:0 0 18px rgba(34,197,94,0.35);
 }
 
 nav{
   display:flex;
-  gap:25px;
+  gap:28px;
 }
 
 nav a{
@@ -57,6 +62,7 @@ nav a:hover{
 
 .hero{
   min-height:100vh;
+  padding:140px 8% 90px;
 
   display:flex;
   flex-direction:column;
@@ -64,110 +70,136 @@ nav a:hover{
   align-items:center;
 
   text-align:center;
-
-  padding:120px 20px;
 }
 
 .hero h1{
-  font-size:65px;
+  font-size:70px;
   color:#22c55e;
-  margin-bottom:20px;
+  margin-bottom:22px;
+  text-shadow:0 0 30px rgba(34,197,94,0.45);
 }
 
 .hero p{
-  max-width:700px;
+  max-width:760px;
   font-size:22px;
   color:#d1d5db;
-  line-height:1.7;
+  line-height:1.8;
 }
 
-.btn{
-  margin-top:35px;
+/* BUTTONS */
 
-  padding:15px 30px;
+.btn,
+.order-btn{
+  display:inline-block;
+  margin-top:30px;
+  padding:15px 32px;
 
-  background:#22c55e;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
   color:white;
 
   text-decoration:none;
+  border-radius:14px;
 
-  border-radius:12px;
-
+  box-shadow:0 0 22px rgba(34,197,94,0.25);
   transition:.3s;
 }
 
-.btn:hover{
-  transform:scale(1.05);
-  background:#16a34a;
+.btn:hover,
+.order-btn:hover{
+  transform:translateY(-4px) scale(1.03);
+  box-shadow:0 0 35px rgba(34,197,94,0.45);
 }
 
 /* SECTION */
 
 section{
-  padding:80px 8%;
+  padding:90px 8%;
 }
 
 h2{
   text-align:center;
-  font-size:45px;
+  font-size:48px;
   color:#22c55e;
-  margin-bottom:40px;
+  margin-bottom:45px;
+  text-shadow:0 0 20px rgba(34,197,94,0.25);
 }
 
 /* CARDS */
 
 .cards{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:25px;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:28px;
 }
 
 .card{
-  background:#0f2e22;
+  background:rgba(15,46,34,0.88);
+  padding:35px;
+  border-radius:24px;
 
-  padding:30px;
+  border:1px solid rgba(34,197,94,0.18);
+  box-shadow:0 0 25px rgba(0,0,0,0.28);
 
-  border-radius:20px;
-
-  border:1px solid rgba(34,197,94,0.15);
-
-  transition:.3s;
+  transition:.35s;
 }
 
 .card:hover{
-  transform:translateY(-8px);
+  transform:translateY(-10px);
+  border-color:rgba(34,197,94,0.45);
+  box-shadow:0 0 35px rgba(34,197,94,0.2);
 }
 
 .card h3{
   color:#22c55e;
-  margin-bottom:15px;
+  margin-bottom:16px;
+  font-size:24px;
 }
 
 .card p{
   color:#d1d5db;
-  line-height:1.6;
+  line-height:1.7;
 }
 
 .card span{
   display:block;
-  margin-top:15px;
-  font-size:24px;
+  margin-top:18px;
+  font-size:28px;
   color:#22c55e;
   font-weight:bold;
+}
+
+/* ORDER BUTTON */
+
+.order-btn{
+  display:block;
+  width:100%;
+  text-align:center;
+  padding:13px;
+  margin-top:22px;
 }
 
 /* FOOTER */
 
 footer{
   text-align:center;
-  padding:25px;
-  background:#05110c;
+  padding:28px;
+  background:#020d08;
   color:#888;
+  border-top:1px solid rgba(34,197,94,0.15);
 }
 
 /* MOBILE */
 
 @media(max-width:768px){
+
+  header{
+    flex-direction:column;
+    gap:15px;
+  }
+
+  nav{
+    gap:18px;
+  }
 
   .hero h1{
     font-size:42px;
@@ -177,32 +209,9 @@ footer{
     font-size:18px;
   }
 
-  nav{
-    gap:15px;
-  }
-
   h2{
-    font-size:35px;
+    font-size:36px;
   }
 
 }
-.order-btn{
-  display:block;
-  margin-top:15px;
-  padding:12px;
-
-  text-align:center;
-  text-decoration:none;
-
-  background:#22c55e;
-  color:white;
-
-  border-radius:10px;
-
-  transition:0.3s;
-}
-
-.order-btn:hover{
-  background:#16a34a;
-  transform:translateY(-2px);
-}
+```
