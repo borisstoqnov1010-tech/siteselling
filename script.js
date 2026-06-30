@@ -1191,7 +1191,15 @@ async function deleteOrder(orderId) {
 
   if (cloudOrdersUrl) {
     await requestJson(`${cloudOrdersUrl}/${encodeURIComponent(orderId)}.json`, {
-      method: "DELETE",
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        deleted: true,
+        status: "deleted",
+        updatedAt: new Date().toISOString(),
+      }),
     });
 
     return;
@@ -1395,6 +1403,7 @@ async function loadOrders() {
       orders = Array.isArray(data.orders) ? data.orders : [];
     }
 
+    orders = orders.filter((order) => !order.deleted && order.status !== "deleted");
     orders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
     if (orders.length === 0) {
@@ -1653,9 +1662,15 @@ function initOrders() {
         await loadOrders();
       } catch {
         button.disabled = false;
+        const oldError = ordersList.querySelector("[data-orders-error]");
+
+        if (oldError) {
+          oldError.remove();
+        }
+
         ordersList.insertAdjacentHTML(
           "afterbegin",
-          '<p class="empty-orders">Не успях да обновя поръчката. Провери Firebase rules.</p>'
+          '<p class="empty-orders" data-orders-error>Не успях да обновя поръчката. Провери Firebase rules.</p>'
         );
       }
     });
