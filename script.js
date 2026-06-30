@@ -1300,7 +1300,11 @@ async function loadAccountsData() {
   const cloudAccountsUrl = getCloudAccountsUrl();
 
   if (cloudAccountsUrl) {
-    return normalizeRecordList(await requestJson(`${cloudAccountsUrl}?v=${Date.now()}`));
+    try {
+      return normalizeRecordList(await requestJson(`${cloudAccountsUrl}?v=${Date.now()}`));
+    } catch {
+      return normalizeRecordList(getLocalAccounts());
+    }
   }
 
   return normalizeRecordList(getLocalAccounts());
@@ -1315,14 +1319,16 @@ async function saveAccount(username, password) {
   const cloudAccountsUrl = getCloudAccountsUrl();
 
   if (cloudAccountsUrl) {
-    await requestJson(`${cloudAccountsUrl}/${encodeURIComponent(username)}.json`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(account),
-    });
-    return account;
+    try {
+      await requestJson(`${cloudAccountsUrl}/${encodeURIComponent(username)}.json`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(account),
+      });
+      return account;
+    } catch {}
   }
 
   const accounts = getLocalAccounts();
@@ -1335,15 +1341,56 @@ async function deleteAccount(username) {
   const cloudAccountsUrl = getCloudAccountsUrl();
 
   if (cloudAccountsUrl) {
-    await requestJson(`${cloudAccountsUrl}/${encodeURIComponent(username)}.json`, {
-      method: "DELETE",
-    });
-    return;
+    try {
+      await requestJson(`${cloudAccountsUrl}/${encodeURIComponent(username)}.json`, {
+        method: "DELETE",
+      });
+    } catch {}
   }
 
   const accounts = getLocalAccounts();
   delete accounts[username];
   saveLocalAccounts(accounts);
+}
+
+async function saveAccountEverywhere(username, password) {
+  const account = await saveAccount(username, password);
+
+  return account;
+}
+
+async function deleteAccountEverywhere(username) {
+  await deleteAccount(username);
+}
+
+async function addAdminLog(action, details = "") {
+  const log = {
+    action,
+    details,
+    user: currentAdminUser || "owner",
+    createdAt: new Date().toISOString(),
+  };
+  const cloudLogsUrl = getCloudLogsUrl();
+
+  if (cloudLogsUrl) {
+    try {
+      await requestJson(cloudLogsUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(log),
+      });
+      return;
+    } catch {}
+  }
+
+  const logs = getLocalLogs();
+  logs.unshift({
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    ...log,
+  });
+  saveLocalLogs(logs);
 }
 
 function getLocalLogs() {
@@ -1372,34 +1419,6 @@ function setOrderStatusLocally(orderId, status) {
   const statuses = getLocalOrderStatuses();
   statuses[orderId] = status;
   localStorage.setItem(LOCAL_ORDER_STATUSES_KEY, JSON.stringify(statuses));
-}
-
-async function addAdminLog(action, details = "") {
-  const log = {
-    action,
-    details,
-    user: currentAdminUser || "owner",
-    createdAt: new Date().toISOString(),
-  };
-  const cloudLogsUrl = getCloudLogsUrl();
-
-  if (cloudLogsUrl) {
-    await requestJson(cloudLogsUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(log),
-    });
-    return;
-  }
-
-  const logs = getLocalLogs();
-  logs.unshift({
-    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    ...log,
-  });
-  saveLocalLogs(logs);
 }
 
 async function authenticateAdmin(username, password) {
