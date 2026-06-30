@@ -2,6 +2,9 @@
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 $adminPassword = 'kuchki55';
 $dataDir = __DIR__ . DIRECTORY_SEPARATOR . 'data';
@@ -25,7 +28,13 @@ if (!file_exists($settingsFile)) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    readfile($settingsFile);
+    $settings = json_decode((string)file_get_contents($settingsFile), true);
+    $settings = is_array($settings) ? $settings : $defaultSettings;
+    $settings['content'] = is_array($settings['content'] ?? null) ? $settings['content'] : [];
+    $settings['discounts'] = is_array($settings['discounts'] ?? null) ? $settings['discounts'] : [];
+    $settings['updatedAt'] = $settings['updatedAt'] ?? gmdate('c', (int)filemtime($settingsFile));
+
+    echo json_encode($settings, JSON_UNESCAPED_UNICODE);
     exit;
 }
 

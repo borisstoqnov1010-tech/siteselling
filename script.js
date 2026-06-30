@@ -2,9 +2,12 @@ const STORAGE_KEY = "boris-web-studio-discounts";
 const CONTENT_KEY = "boris-web-studio-content";
 const THEME_KEY = "boris-web-studio-theme";
 const REMOTE_SETTINGS_URL = "settings.php";
+const SETTINGS_SYNC_INTERVAL = 8000;
 const ADMIN_PASSWORD = "kuchki55";
 const ADMIN_SESSION_KEY = "boris-web-studio-admin-unlocked";
 const SERVICES = ["cs2", "minecraft", "custom"];
+let currentSettingsSignature = "";
+let settingsSyncTimer = null;
 
 const defaultContent = {
   heroEyebrow: "Бързи, модерни и зелени уебсайтове",
@@ -94,6 +97,7 @@ async function loadSharedState() {
         ...(data.content || {}),
       },
       discounts: data.discounts || {},
+      updatedAt: data.updatedAt || "",
       isShared: true,
     };
   } catch {
@@ -123,6 +127,78 @@ async function saveSharedState(content, discounts) {
   }
 
   return response.json();
+}
+
+function getSettingsSignature(content, discounts, updatedAt = "") {
+  return JSON.stringify({
+    content,
+    discounts,
+    updatedAt,
+  });
+}
+
+function persistState(content, discounts) {
+  saveContent(content);
+  saveDiscounts(discounts);
+}
+
+function applySiteState(content, discounts, options = {}) {
+  const shouldFillForms = options.fillForms ?? true;
+  const shouldPersist = options.persist ?? true;
+
+  if (shouldPersist) {
+    persistState(content, discounts);
+  }
+
+  applyContent(content);
+  applyDiscounts(discounts);
+  updateDurationFields();
+  updateAdminPreview(discounts);
+
+  if (shouldFillForms) {
+    fillContentForm(content);
+    fillDiscountForm(discounts);
+  }
+}
+
+function isAdminUnlocked() {
+  return Boolean(adminPanel && !adminPanel.classList.contains("is-hidden"));
+}
+
+async function refreshSharedState(options = {}) {
+  const sharedState = await loadSharedState();
+
+  if (!sharedState.isShared) {
+    return false;
+  }
+
+  const signature = getSettingsSignature(
+    sharedState.content,
+    sharedState.discounts,
+    sharedState.updatedAt
+  );
+
+  if (!options.force && signature === currentSettingsSignature) {
+    return true;
+  }
+
+  currentSettingsSignature = signature;
+  applySiteState(sharedState.content, sharedState.discounts, {
+    fillForms: !isAdminUnlocked() || options.fillForms === true,
+    persist: true,
+  });
+
+  return true;
+}
+
+function startSettingsSync() {
+  if (settingsSyncTimer) {
+    clearInterval(settingsSyncTimer);
+  }
+
+  settingsSyncTimer = setInterval(() => {
+    refreshSharedState().catch(() => {});
+  }, SETTINGS_SYNC_INTERVAL);
 }
 
 function clampDiscount(value) {
@@ -714,11 +790,11 @@ function initImageUploads() {
       };
       const discounts = form ? getFormDiscounts() : loadDiscounts();
 
-      applyContent(content);
-      fillContentForm(content);
-      saveContent(content);
-      saveDiscounts(discounts);
-      updateAdminPreview(discounts);
+      applySiteState(content, discounts);
+      await refreshSharedState({
+        force: true,
+        fillForms: false,
+      });
 
       IMAGE_KEYS.forEach((key) => {
         const input = form.elements[key];
@@ -787,15 +863,9 @@ async function init() {
   const sharedState = await loadSharedState();
   const content = sharedState.content;
   const savedDiscounts = sharedState.discounts;
-
-  saveContent(content);
-  saveDiscounts(savedDiscounts);
-  applyContent(content);
-  fillContentForm(content);
-  fillDiscountForm(savedDiscounts);
-  applyDiscounts(savedDiscounts);
-  updateDurationFields();
-  updateAdminPreview(savedDiscounts);
+  currentSettingsSignature = getSettingsSignature(content, savedDiscounts, sharedState.updatedAt);
+  applySiteState(content, savedDiscounts);
+  startSettingsSync();
 
   if (adminLogin && sessionStorage.getItem(ADMIN_SESSION_KEY) === "true") {
     unlockAdmin();
@@ -844,7 +914,20 @@ async function init() {
       saveDiscounts(discounts);
 
       try {
-        await saveSharedState(nextContent, discounts);
+        const result = await saveSharedState(nextContent, discounts);
+        const savedSettings = result.settings || {
+          content: nextContent,
+          discounts,
+          updatedAt: "",
+        };
+        currentSettingsSignature = getSettingsSignature(
+          {
+            ...defaultContent,
+            ...(savedSettings.content || nextContent),
+          },
+          savedSettings.discounts || discounts,
+          savedSettings.updatedAt || ""
+        );
         showStatus("Запазено за всички посетители.");
       } catch {
         showStatus("Запазено само при теб. Качи сайта на PHP хостинг, за да се вижда от всички.");
@@ -864,7 +947,20 @@ async function init() {
       saveDiscounts(discounts);
 
       try {
-        await saveSharedState(currentContent, discounts);
+        const result = await saveSharedState(currentContent, discounts);
+        const savedSettings = result.settings || {
+          content: currentContent,
+          discounts,
+          updatedAt: "",
+        };
+        currentSettingsSignature = getSettingsSignature(
+          {
+            ...defaultContent,
+            ...(savedSettings.content || currentContent),
+          },
+          savedSettings.discounts || discounts,
+          savedSettings.updatedAt || ""
+        );
         showStatus("Отстъпките са изчистени за всички.");
       } catch {
         showStatus("Отстъпките са изчистени само при теб.");
