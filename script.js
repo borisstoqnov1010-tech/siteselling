@@ -350,6 +350,8 @@ function applySiteState(content, discounts, options = {}) {
     fillContentForm(content);
     fillDiscountForm(discounts);
   }
+
+  applyLanguage(localStorage.getItem(LANGUAGE_KEY) || "bg");
 }
 
 function isAdminUnlocked() {
@@ -484,6 +486,11 @@ function applyContent(content) {
 
     if (content[key]) {
       element.textContent = content[key];
+      element.childNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+          node.originalBgText = node.textContent.trim();
+        }
+      });
     }
   });
 
@@ -661,6 +668,8 @@ function updateOrderPriceFromSelection() {
 }
 
 function applyDiscounts(discounts) {
+  const language = localStorage.getItem(LANGUAGE_KEY) || "bg";
+
   serviceCards.forEach((card) => {
     const service = card.dataset.service;
     const basePrice = normalizePrice(card.dataset.price);
@@ -675,9 +684,13 @@ function applyDiscounts(discounts) {
     }
 
     if (discountNote) {
-      discountNote.textContent = settings.discount > 0
-        ? `-${settings.discount}% отстъпка${durationText}, стара цена ${formatPrice(basePrice)}`
-        : "";
+      if (settings.discount > 0) {
+        discountNote.textContent = language === "en"
+          ? `-${settings.discount}% discount${settings.duration ? ` for ${settings.duration}` : ""}, old price ${formatPrice(basePrice)}`
+          : `-${settings.discount}% отстъпка${durationText}, стара цена ${formatPrice(basePrice)}`;
+      } else {
+        discountNote.textContent = "";
+      }
     }
   });
 
@@ -949,6 +962,26 @@ const staticTextTranslations = {
   "Изтрий": "Delete",
   "Готова": "Done",
   "Отказана": "Cancelled",
+  "Бързи, модерни и зелени уебсайтове": "Fast, modern and green websites",
+  "Сайт, който изглежда сериозно още от първия клик.": "A website that looks serious from the first click.",
+  "Правя чисти, responsive сайтове за CS 2, Minecraft, лични проекти и малки бизнеси. Получаваш дизайн, структура и готов линк за поръчки през Discord.": "I build clean, responsive websites for CS 2, Minecraft, personal projects and small businesses. You get design, structure and a ready order flow through Discord.",
+  "Gaming пакет": "Gaming package",
+  "Страница за CS 2 сървър с IP, Discord, правила, статус и силна първа визия.": "A page for a CS 2 server with IP, Discord, rules, status and a strong first impression.",
+  "Community пакет": "Community package",
+  "Сайт за Minecraft сървър с секции за режимите, снимки, правила и join бутон.": "A website for a Minecraft server with sections for modes, images, rules and a join button.",
+  "Custom пакет": "Custom package",
+  "Персонален сайт според твоята идея: портфолио, магазин, landing page или проект.": "A personal website based on your idea: portfolio, shop, landing page or project.",
+  "Hero секция, IP адрес, Discord бутон, правила и сървър статус.": "Hero section, IP address, Discord button, rules and server status.",
+  "Minecraft community": "Minecraft community",
+  "Режими, снимки, правила, join секция и информация за играчите.": "Modes, images, rules, join section and player information.",
+  "Custom project": "Custom project",
+  "Портфолио, бизнес сайт или online presence с уникална структура.": "Portfolio, business website or online presence with a unique structure.",
+  "“Сайтът стана бързо и изглежда много по-сериозно от стария ни Discord invite.”": "\"The website was finished quickly and looks much more serious than our old Discord invite.\"",
+  "CS 2 клиент": "CS 2 client",
+  "“Хареса ми, че работи добре на телефон и всичко е подредено ясно.”": "\"I liked that it works well on mobile and everything is clearly arranged.\"",
+  "Minecraft проект": "Minecraft project",
+  "“Получих точния стил, който исках, плюс лесен начин хората да поръчват.”": "\"I got the exact style I wanted, plus an easy way for people to order.\"",
+  "Custom сайт": "Custom website",
 };
 
 const staticPlaceholderTranslations = {
@@ -985,7 +1018,7 @@ function applyStaticLanguage(language) {
 
       const parent = node.parentElement;
 
-      if (!parent || parent.closest("[data-content], [data-announcement-bar], script, style")) {
+      if (!parent || parent.closest("[data-announcement-bar], script, style")) {
         return NodeFilter.FILTER_REJECT;
       }
 
