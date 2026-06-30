@@ -2,6 +2,7 @@ const STORAGE_KEY = "boris-web-studio-discounts";
 const CONTENT_KEY = "boris-web-studio-content";
 const THEME_KEY = "boris-web-studio-theme";
 const HIDDEN_ORDERS_KEY = "boris-web-studio-hidden-orders";
+const LOCAL_ORDER_STATUSES_KEY = "boris-web-studio-local-order-statuses";
 const REMOTE_SETTINGS_URL = "settings.php";
 const SETTINGS_SYNC_INTERVAL = 8000;
 const ADMIN_PASSWORD = "kuchki55";
@@ -1363,6 +1364,16 @@ function hideOrderLocally(orderId) {
   localStorage.setItem(HIDDEN_ORDERS_KEY, JSON.stringify(Array.from(hiddenIds)));
 }
 
+function getLocalOrderStatuses() {
+  return readJson(LOCAL_ORDER_STATUSES_KEY, {});
+}
+
+function setOrderStatusLocally(orderId, status) {
+  const statuses = getLocalOrderStatuses();
+  statuses[orderId] = status;
+  localStorage.setItem(LOCAL_ORDER_STATUSES_KEY, JSON.stringify(statuses));
+}
+
 async function addAdminLog(action, details = "") {
   const log = {
     action,
@@ -1440,9 +1451,17 @@ async function loadOrders() {
     }
 
     const hiddenOrderIds = new Set(getHiddenOrderIds());
+    const localOrderStatuses = getLocalOrderStatuses();
     orders = orders.filter((order) => {
       const orderId = order.storageId || order.id;
       return !order.deleted && order.status !== "deleted" && !hiddenOrderIds.has(orderId);
+    }).map((order) => {
+      const orderId = order.storageId || order.id;
+
+      return {
+        ...order,
+        status: localOrderStatuses[orderId] || order.status,
+      };
     });
     orders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
@@ -1713,6 +1732,8 @@ function initOrders() {
           await deleteOrder(orderId);
           await addAdminLog("Изтрита поръчка", orderId).catch(() => {});
         } else {
+          setOrderStatusLocally(orderId, statusButton.dataset.orderStatus);
+          await loadOrders();
           await updateOrderStatus(orderId, statusButton.dataset.orderStatus);
           await addAdminLog("Променен статус на поръчка", `${orderId}: ${statusButton.dataset.orderStatus}`).catch(() => {});
         }
@@ -1721,7 +1742,7 @@ function initOrders() {
       } catch {
         button.disabled = false;
 
-        if (deleteButton) {
+        if (deleteButton || statusButton) {
           return;
         }
 
