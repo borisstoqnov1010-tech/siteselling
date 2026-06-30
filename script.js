@@ -8,6 +8,7 @@ const ADMIN_SESSION_KEY = "boris-web-studio-admin-unlocked";
 const SERVICES = ["cs2", "minecraft", "custom"];
 let currentSettingsSignature = "";
 let settingsSyncTimer = null;
+let currentCheckoutOrder = null;
 
 const defaultContent = {
   heroEyebrow: "Бързи, модерни и зелени уебсайтове",
@@ -99,6 +100,16 @@ function getCloudSettingsUrl() {
   }
 
   return `${databaseUrl}/settings.json`;
+}
+
+function getCloudOrdersUrl() {
+  const databaseUrl = String(window.BORIS_SYNC_DATABASE_URL || "").trim().replace(/\/+$/, "");
+
+  if (!databaseUrl) {
+    return "";
+  }
+
+  return `${databaseUrl}/orders.json`;
 }
 
 function isGithubPages() {
@@ -817,6 +828,11 @@ function openCheckout(service) {
   const paymentMethodsForService = getPaymentMethods(service);
   const hasPaymentMethod = Boolean(paymentMethodsForService.revolut || paymentMethodsForService.paypal);
   const discordInvite = getDiscordInvite();
+  currentCheckoutOrder = {
+    service: title,
+    budget: price || "-",
+    description: "Клиентът натисна Поръчай от пакетите.",
+  };
 
   if (checkoutTitle) {
     checkoutTitle.textContent = title;
@@ -886,6 +902,55 @@ function initCheckout() {
     });
   }
 
+  async function openCheckoutLink(event, link, paymentMethod, description) {
+    event.preventDefault();
+
+    if (!link || link.classList.contains("is-disabled")) {
+      return;
+    }
+
+    const url = link.href;
+    const nextTab = window.open("about:blank", "_blank");
+
+    if (nextTab) {
+      nextTab.opener = null;
+    }
+
+    try {
+      await saveOrder({
+        ...(currentCheckoutOrder || {}),
+        source: "Checkout popup",
+        paymentMethod,
+        description,
+      });
+    } catch {}
+
+    if (nextTab) {
+      nextTab.location.href = url;
+      return;
+    }
+
+    window.location.href = url;
+  }
+
+  if (discordOrderLink) {
+    discordOrderLink.addEventListener("click", (event) => {
+      openCheckoutLink(event, discordOrderLink, "Discord", "Клиентът избра поръчка през Discord.");
+    });
+  }
+
+  if (payRevolutLink) {
+    payRevolutLink.addEventListener("click", (event) => {
+      openCheckoutLink(event, payRevolutLink, "Revolut", "Клиентът избра плащане през Revolut.");
+    });
+  }
+
+  if (payPaypalLink) {
+    payPaypalLink.addEventListener("click", (event) => {
+      openCheckoutLink(event, payPaypalLink, "PayPal", "Клиентът избра плащане през PayPal.");
+    });
+  }
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeCheckout();
@@ -902,15 +967,60 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
-async function submitOrder(formElement) {
-  const data = new FormData(formElement);
-  const payload = Object.fromEntries(data.entries());
+function createOrder(payload) {
+  return {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    name: String(payload.name || "-").trim() || "-",
+    discord: String(payload.discord || "-").trim() || "-",
+    service: String(payload.service || "Нова заявка").trim() || "Нова заявка",
+    budget: String(payload.budget || "-").trim() || "-",
+    description: String(payload.description || "-").trim() || "-",
+    source: String(payload.source || "Форма").trim(),
+    paymentMethod: String(payload.paymentMethod || "").trim(),
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function normalizeOrders(data) {
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (!data || typeof data !== "object") {
+    return [];
+  }
+
+  return Object.entries(data).map(([id, order]) => ({
+    id,
+    ...(order || {}),
+  }));
+}
+
+async function saveOrder(payload) {
+  const order = createOrder(payload);
+  const cloudOrdersUrl = getCloudOrdersUrl();
+
+  if (cloudOrdersUrl) {
+    await requestJson(cloudOrdersUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(order),
+    });
+
+    return {
+      ok: true,
+      order,
+    };
+  }
+
   const response = await fetch("orders.php", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(order),
   });
 
   if (!response.ok) {
@@ -918,6 +1028,16 @@ async function submitOrder(formElement) {
   }
 
   return response.json();
+}
+
+async function submitOrder(formElement) {
+  const data = new FormData(formElement);
+  const payload = Object.fromEntries(data.entries());
+
+  return saveOrder({
+    ...payload,
+    source: "Форма от сайта",
+  });
 }
 
 async function loadOrders() {
@@ -928,16 +1048,26 @@ async function loadOrders() {
   ordersList.innerHTML = '<p class="empty-orders">Зареждане...</p>';
 
   try {
-    const response = await fetch(`orders.php?password=${encodeURIComponent(ADMIN_PASSWORD)}&v=${Date.now()}`, {
-      cache: "no-store",
-    });
+    const cloudOrdersUrl = getCloudOrdersUrl();
+    let orders = [];
 
-    if (!response.ok) {
-      throw new Error("Orders request failed");
+    if (cloudOrdersUrl) {
+      const data = await requestJson(`${cloudOrdersUrl}?v=${Date.now()}`);
+      orders = normalizeOrders(data);
+    } else {
+      const response = await fetch(`orders.php?password=${encodeURIComponent(ADMIN_PASSWORD)}&v=${Date.now()}`, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("Orders request failed");
+      }
+
+      const data = await response.json();
+      orders = Array.isArray(data.orders) ? data.orders : [];
     }
 
-    const data = await response.json();
-    const orders = Array.isArray(data.orders) ? data.orders : [];
+    orders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
     if (orders.length === 0) {
       ordersList.innerHTML = '<p class="empty-orders">Все още няма заявки.</p>';
@@ -953,13 +1083,15 @@ async function loadOrders() {
           <p><strong>Име:</strong> ${escapeHtml(order.name || "-")}</p>
           <p><strong>Discord:</strong> ${escapeHtml(order.discord || "-")}</p>
           <p><strong>Бюджет:</strong> ${escapeHtml(order.budget || "-")}</p>
+          <p><strong>Източник:</strong> ${escapeHtml(order.source || "-")}</p>
+          <p><strong>Плащане:</strong> ${escapeHtml(order.paymentMethod || "-")}</p>
           <p><strong>Описание:</strong> ${escapeHtml(order.description || "-")}</p>
           <p><strong>Дата:</strong> ${escapeHtml(createdAt)}</p>
         </article>
       `;
     }).join("");
   } catch {
-    ordersList.innerHTML = '<p class="empty-orders">Не успях да заредя заявките. Нужно е PHP хостинг.</p>';
+    ordersList.innerHTML = '<p class="empty-orders">Не успях да заредя заявките. Провери Firebase URL/rules или PHP хостинга.</p>';
   }
 }
 
