@@ -415,6 +415,40 @@ function addChatMessage(text, type = "bot") {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+function getLocalServiceSummary() {
+  if (serviceCards.length === 0) {
+    return "CS 2 Server, Minecraft Server и Сайт по избор.";
+  }
+
+  return serviceCards.map((card) => {
+    const title = card.querySelector("h3")?.textContent?.trim() || "Пакет";
+    const price = card.querySelector("[data-price-output]")?.textContent?.trim() || "";
+    const discount = card.querySelector("[data-discount-note]")?.textContent?.trim() || "";
+
+    return `- ${title}: ${price}${discount ? ` (${discount})` : ""}`;
+  }).join("\n");
+}
+
+function getLocalChatReply(text) {
+  const question = text.toLowerCase();
+  const services = getLocalServiceSummary();
+  const discord = "https://discord.gg/sSkQC2UmkY";
+
+  if (question.includes("цена") || question.includes("колко") || question.includes("пакет") || question.includes("отстъп")) {
+    return `Ето текущите пакети:\n${services}\n\nЗа поръчка можеш да пишеш в Discord: ${discord}`;
+  }
+
+  if (question.includes("поръч") || question.includes("discord") || question.includes("контакт")) {
+    return `За поръчка пиши в Discord: ${discord}. Изпрати какъв сайт искаш, име на проекта, цветове, текстове и примерен стил.`;
+  }
+
+  if (question.includes("какво") || question.includes("трябва") || question.includes("изпрат")) {
+    return "За да започнем, изпрати: име на проекта, тип сайт, Discord линк, текстове, снимки/лого, цветове и пример за стил, който харесваш.";
+  }
+
+  return `Мога да помогна с избор на пакет, цена, срок и поръчка.\n\nТекущи пакети:\n${services}\n\nПиши в Discord: ${discord}`;
+}
+
 function initChatbot() {
   if (!chatToggle || !chatPanel || !chatForm) {
     return;
@@ -463,9 +497,9 @@ function initChatbot() {
       }
 
       const data = await response.json();
-      thinkingMessage.textContent = data.reply || "Не успях да отговоря в момента.";
+      thinkingMessage.textContent = data.reply || getLocalChatReply(text);
     } catch {
-      thinkingMessage.textContent = "Не успях да се свържа с AI. Пиши директно в Discord за най-бърз отговор.";
+      thinkingMessage.textContent = getLocalChatReply(text);
     }
   });
 }
