@@ -76,9 +76,25 @@ a {
   color: inherit;
 }
 
-.site-header {
+.announcement-bar {
   position: fixed;
   inset: 0 0 auto;
+  z-index: 35;
+  min-height: var(--announcement-height, 42px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px clamp(18px, 6vw, 88px);
+  color: var(--announcement-text, #031008);
+  background: var(--announcement-bg, var(--green-2));
+  font-size: 14px;
+  font-weight: 950;
+  text-align: center;
+}
+
+.site-header {
+  position: fixed;
+  inset: var(--announcement-height-active, 0) 0 auto;
   z-index: 20;
   min-height: 76px;
   display: flex;
@@ -153,6 +169,10 @@ a {
   align-items: center;
   gap: clamp(36px, 6vw, 90px);
   padding: 140px clamp(20px, 6vw, 88px) 82px;
+}
+
+body.has-announcement .hero {
+  padding-top: calc(140px + var(--announcement-height, 42px));
 }
 
 .hero-content {
@@ -1169,6 +1189,56 @@ footer {
 
 .order-card strong {
   color: var(--green-2);
+}
+
+.order-status-badge {
+  display: inline-flex;
+  width: fit-content;
+  margin: 2px 0 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--green-2);
+  background: rgba(34, 197, 94, 0.1);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.order-status-badge.done {
+  color: #07130b;
+  background: var(--green-2);
+}
+
+.order-status-badge.cancelled {
+  color: #ffb1b1;
+  border-color: rgba(255, 104, 104, 0.35);
+  background: rgba(255, 104, 104, 0.1);
+}
+
+.order-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.order-actions-row button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: rgba(34, 197, 94, 0.1);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.order-actions-row .danger-button {
+  color: #ffb1b1;
+  border-color: rgba(255, 104, 104, 0.35);
+  background: rgba(255, 104, 104, 0.1);
 }
 
 .empty-orders {

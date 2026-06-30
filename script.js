@@ -11,6 +11,9 @@ let settingsSyncTimer = null;
 let currentCheckoutOrder = null;
 
 const defaultContent = {
+  announcementText: "",
+  announcementBg: "#22c55e",
+  announcementTextColor: "#031008",
   heroEyebrow: "Бързи, модерни и зелени уебсайтове",
   heroTitle: "Сайт, който изглежда сериозно още от първия клик.",
   heroText: "Правя чисти, responsive сайтове за CS 2, Minecraft, лични проекти и малки бизнеси. Получаваш дизайн, структура и готов линк за поръчки през Discord.",
@@ -82,6 +85,8 @@ const ordersList = document.querySelector("[data-orders-list]");
 const refreshOrdersButton = document.querySelector("[data-refresh-orders]");
 const uploadImagesButton = document.querySelector("[data-upload-images]");
 const uploadStatus = document.querySelector("[data-upload-status]");
+const announcementBar = document.querySelector("[data-announcement-bar]");
+const announcementText = document.querySelector("[data-announcement-text]");
 const adminTabButtons = Array.from(document.querySelectorAll("[data-admin-tab]"));
 const adminTabPanels = Array.from(document.querySelectorAll("[data-tab-panel]"));
 const IMAGE_KEYS = ["logoImage", "heroImage", "galleryOneImage", "galleryTwoImage", "galleryThreeImage"];
@@ -411,7 +416,34 @@ function applyImages(content) {
   });
 }
 
+function applyAnnouncement(content) {
+  if (!announcementBar || !announcementText) {
+    return;
+  }
+
+  const text = String(content.announcementText || "").trim();
+
+  if (!text) {
+    announcementBar.classList.add("is-hidden");
+    document.body.classList.remove("has-announcement");
+    document.documentElement.style.setProperty("--announcement-height-active", "0");
+    return;
+  }
+
+  const background = content.announcementBg || defaultContent.announcementBg;
+  const textColor = content.announcementTextColor || defaultContent.announcementTextColor;
+
+  announcementText.textContent = text;
+  announcementBar.style.setProperty("--announcement-bg", background);
+  announcementBar.style.setProperty("--announcement-text", textColor);
+  announcementBar.classList.remove("is-hidden");
+  document.body.classList.add("has-announcement");
+  document.documentElement.style.setProperty("--announcement-height-active", "var(--announcement-height, 42px)");
+}
+
 function applyContent(content) {
+  applyAnnouncement(content);
+
   document.querySelectorAll("[data-content]").forEach((element) => {
     const key = element.dataset.content;
 
@@ -1022,6 +1054,7 @@ function createOrder(payload) {
     description: String(payload.description || "-").trim() || "-",
     source: String(payload.source || "Форма").trim(),
     paymentMethod: String(payload.paymentMethod || "").trim(),
+    status: String(payload.status || "new").trim(),
     createdAt: new Date().toISOString(),
   };
 }
@@ -1035,9 +1068,10 @@ function normalizeOrders(data) {
     return [];
   }
 
-  return Object.entries(data).map(([id, order]) => ({
-    id,
+  return Object.entries(data).map(([storageId, order]) => ({
     ...(order || {}),
+    id: order?.id || storageId,
+    storageId,
   }));
 }
 
@@ -1075,6 +1109,68 @@ async function saveOrder(payload) {
   return response.json();
 }
 
+async function updateOrderStatus(orderId, status) {
+  const cloudOrdersUrl = getCloudOrdersUrl();
+
+  if (cloudOrdersUrl) {
+    await requestJson(`${cloudOrdersUrl}/${encodeURIComponent(orderId)}.json`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status,
+        updatedAt: new Date().toISOString(),
+      }),
+    });
+
+    return;
+  }
+
+  const response = await fetch("orders.php", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      password: ADMIN_PASSWORD,
+      id: orderId,
+      status,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Order update failed");
+  }
+}
+
+async function deleteOrder(orderId) {
+  const cloudOrdersUrl = getCloudOrdersUrl();
+
+  if (cloudOrdersUrl) {
+    await requestJson(`${cloudOrdersUrl}/${encodeURIComponent(orderId)}.json`, {
+      method: "DELETE",
+    });
+
+    return;
+  }
+
+  const response = await fetch("orders.php", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      password: ADMIN_PASSWORD,
+      id: orderId,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Order delete failed");
+  }
+}
+
 async function submitOrder(formElement) {
   const data = new FormData(formElement);
   const payload = Object.fromEntries(data.entries());
@@ -1083,6 +1179,18 @@ async function submitOrder(formElement) {
     ...payload,
     source: "Форма от сайта",
   });
+}
+
+function getOrderStatusLabel(status) {
+  if (status === "done") {
+    return "Готова";
+  }
+
+  if (status === "cancelled") {
+    return "Отказана";
+  }
+
+  return "Нова";
 }
 
 async function loadOrders() {
@@ -1121,10 +1229,13 @@ async function loadOrders() {
 
     ordersList.innerHTML = orders.map((order) => {
       const createdAt = order.createdAt ? new Date(order.createdAt).toLocaleString("bg-BG") : "";
+      const status = order.status || "new";
+      const orderId = order.storageId || order.id;
 
       return `
-        <article class="order-card">
+        <article class="order-card" data-order-card="${escapeHtml(orderId)}">
           <h4>${escapeHtml(order.service || "Нова заявка")}</h4>
+          <span class="order-status-badge ${escapeHtml(status)}">${escapeHtml(getOrderStatusLabel(status))}</span>
           <p><strong>Име:</strong> ${escapeHtml(order.name || "-")}</p>
           <p><strong>Discord:</strong> ${escapeHtml(order.discord || "-")}</p>
           <p><strong>Бюджет:</strong> ${escapeHtml(order.budget || "-")}</p>
@@ -1132,6 +1243,11 @@ async function loadOrders() {
           <p><strong>Плащане:</strong> ${escapeHtml(order.paymentMethod || "-")}</p>
           <p><strong>Описание:</strong> ${escapeHtml(order.description || "-")}</p>
           <p><strong>Дата:</strong> ${escapeHtml(createdAt)}</p>
+          <div class="order-actions-row">
+            <button type="button" data-order-status="done" data-order-id="${escapeHtml(orderId)}">Готова</button>
+            <button type="button" data-order-status="cancelled" data-order-id="${escapeHtml(orderId)}">Отказана</button>
+            <button type="button" class="danger-button" data-order-delete data-order-id="${escapeHtml(orderId)}">Изтрий</button>
+          </div>
         </article>
       `;
     }).join("");
@@ -1253,6 +1369,42 @@ function initOrders() {
   if (refreshOrdersButton) {
     refreshOrdersButton.addEventListener("click", () => {
       loadOrders();
+    });
+  }
+
+  if (ordersList) {
+    ordersList.addEventListener("click", async (event) => {
+      const statusButton = event.target.closest("[data-order-status]");
+      const deleteButton = event.target.closest("[data-order-delete]");
+      const button = statusButton || deleteButton;
+
+      if (!button) {
+        return;
+      }
+
+      const orderId = button.dataset.orderId;
+
+      if (!orderId) {
+        return;
+      }
+
+      button.disabled = true;
+
+      try {
+        if (deleteButton) {
+          await deleteOrder(orderId);
+        } else {
+          await updateOrderStatus(orderId, statusButton.dataset.orderStatus);
+        }
+
+        await loadOrders();
+      } catch {
+        button.disabled = false;
+        ordersList.insertAdjacentHTML(
+          "afterbegin",
+          '<p class="empty-orders">Не успях да обновя поръчката. Провери Firebase rules.</p>'
+        );
+      }
     });
   }
 }

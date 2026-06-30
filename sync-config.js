@@ -5,19 +5,19 @@ window.BORIS_SYNC_DATABASE_URL = "https://boriswebstudio-default-rtdb.europe-wes
 // Optional checkout links. Put Revolut and PayPal payment links here.
 window.BORIS_PAYMENT_LINKS = {
   cs2: {
-    revolut: "",
+    revolut: "https://revolut.me/boris_q8_on4w",
     paypal: ""
   },
   minecraft: {
-    revolut: "",
+    revolut: "https://revolut.me/boris_q8_on4w",
     paypal: ""
   },
   custom: {
-    revolut: "",
+    revolut: "https://revolut.me/boris_q8_on4w",
     paypal: ""
   },
   default: {
-    revolut: "",
+    revolut: "https://revolut.me/boris_q8_on4w",
     paypal: ""
   }
 };
