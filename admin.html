@@ -32,6 +32,10 @@
       <form class="admin-login" id="adminLogin">
         <h3>Вход за админ</h3>
         <label>
+          Потребител
+          <input type="text" id="adminUsername" autocomplete="username" placeholder="admin или остави празно">
+        </label>
+        <label>
           Парола
           <input type="password" id="adminPassword" autocomplete="current-password" placeholder="Въведи парола">
         </label>
@@ -55,6 +59,8 @@
           <button type="button" data-admin-tab="images">Снимки</button>
           <button type="button" data-admin-tab="discounts">Отстъпки</button>
           <button type="button" data-admin-tab="orders">Поръчки</button>
+          <button type="button" data-admin-tab="accounts">Акаунти</button>
+          <button type="button" data-admin-tab="logs">Логове</button>
         </div>
 
         <form class="discount-form" id="discountForm">
@@ -325,6 +331,46 @@
         </div>
         <div class="orders-list" data-orders-list>
           <p class="empty-orders">Няма заредени заявки.</p>
+        </div>
+      </div>
+
+      <div class="orders-panel admin-tab-panel is-hidden" data-tab-panel="accounts">
+        <div class="orders-header">
+          <div>
+            <p class="eyebrow">Акаунти</p>
+            <h3>Admin потребители</h3>
+          </div>
+          <button type="button" class="ghost-button" data-refresh-accounts>Обнови</button>
+        </div>
+
+        <form class="account-form" data-account-form>
+          <label>
+            Потребител
+            <input type="text" name="username" placeholder="Например: boris" required>
+          </label>
+          <label>
+            Парола
+            <input type="password" name="password" placeholder="Нова парола" required>
+          </label>
+          <button type="submit">Създай акаунт</button>
+          <p class="admin-status" data-account-status aria-live="polite"></p>
+        </form>
+
+        <div class="orders-list" data-accounts-list>
+          <p class="empty-orders">Няма заредени акаунти.</p>
+        </div>
+      </div>
+
+      <div class="orders-panel admin-tab-panel is-hidden" data-tab-panel="logs">
+        <div class="orders-header">
+          <div>
+            <p class="eyebrow">Логове</p>
+            <h3>История на действията</h3>
+          </div>
+          <button type="button" class="ghost-button" data-refresh-logs>Обнови</button>
+        </div>
+        <div class="orders-list" data-logs-list>
+          <p class="empty-orders">Няма заредени логове.</p>
         </div>
       </div>
     </section>

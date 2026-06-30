@@ -5,10 +5,12 @@ const REMOTE_SETTINGS_URL = "settings.php";
 const SETTINGS_SYNC_INTERVAL = 8000;
 const ADMIN_PASSWORD = "kuchki55";
 const ADMIN_SESSION_KEY = "boris-web-studio-admin-unlocked";
+const ADMIN_USER_KEY = "boris-web-studio-admin-user";
 const SERVICES = ["cs2", "minecraft", "custom"];
 let currentSettingsSignature = "";
 let settingsSyncTimer = null;
 let currentCheckoutOrder = null;
+let currentAdminUser = "owner";
 
 const defaultContent = {
   announcementText: "",
@@ -49,6 +51,7 @@ const defaultContent = {
 };
 
 const adminLogin = document.querySelector("#adminLogin");
+const adminUsername = document.querySelector("#adminUsername");
 const adminPassword = document.querySelector("#adminPassword");
 const passwordStatus = document.querySelector("#passwordStatus");
 const adminPanel = document.querySelector("#adminPanel");
@@ -83,6 +86,12 @@ const orderStatus = document.querySelector("[data-order-status]");
 const ordersPanel = document.querySelector("#ordersPanel");
 const ordersList = document.querySelector("[data-orders-list]");
 const refreshOrdersButton = document.querySelector("[data-refresh-orders]");
+const accountForm = document.querySelector("[data-account-form]");
+const accountStatus = document.querySelector("[data-account-status]");
+const accountsList = document.querySelector("[data-accounts-list]");
+const refreshAccountsButton = document.querySelector("[data-refresh-accounts]");
+const logsList = document.querySelector("[data-logs-list]");
+const refreshLogsButton = document.querySelector("[data-refresh-logs]");
 const uploadImagesButton = document.querySelector("[data-upload-images]");
 const uploadStatus = document.querySelector("[data-upload-status]");
 const announcementBar = document.querySelector("[data-announcement-bar]");
@@ -117,6 +126,26 @@ function getCloudOrdersUrl() {
   }
 
   return `${databaseUrl}/orders.json`;
+}
+
+function getCloudAccountsUrl() {
+  const databaseUrl = String(window.BORIS_SYNC_DATABASE_URL || "").trim().replace(/\/+$/, "");
+
+  if (!databaseUrl) {
+    return "";
+  }
+
+  return `${databaseUrl}/adminAccounts.json`;
+}
+
+function getCloudLogsUrl() {
+  const databaseUrl = String(window.BORIS_SYNC_DATABASE_URL || "").trim().replace(/\/+$/, "");
+
+  if (!databaseUrl) {
+    return "";
+  }
+
+  return `${databaseUrl}/adminLogs.json`;
 }
 
 function isGithubPages() {
@@ -686,7 +715,11 @@ function unlockAdmin() {
   adminPanel.classList.remove("is-hidden");
   passwordStatus.textContent = "";
   adminPassword.value = "";
+  if (adminUsername) {
+    adminUsername.value = "";
+  }
   sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
+  sessionStorage.setItem(ADMIN_USER_KEY, currentAdminUser);
   activateAdminTab("content");
 }
 
@@ -702,6 +735,7 @@ function lockAdmin() {
   }
   showStatus("");
   sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  sessionStorage.removeItem(ADMIN_USER_KEY);
 }
 
 function activateAdminTab(tabName) {
@@ -715,6 +749,14 @@ function activateAdminTab(tabName) {
 
   if (tabName === "orders") {
     loadOrders();
+  }
+
+  if (tabName === "accounts") {
+    loadAccounts();
+  }
+
+  if (tabName === "logs") {
+    loadLogs();
   }
 }
 
@@ -1193,6 +1235,139 @@ function getOrderStatusLabel(status) {
   return "Нова";
 }
 
+function normalizeRecordList(data) {
+  if (Array.isArray(data)) {
+    return data.map((item, index) => ({
+      storageId: item.id || String(index),
+      ...item,
+    }));
+  }
+
+  if (!data || typeof data !== "object") {
+    return [];
+  }
+
+  return Object.entries(data).map(([storageId, item]) => ({
+    storageId,
+    ...(item || {}),
+  }));
+}
+
+function getLocalAccounts() {
+  return readJson("boris-web-studio-admin-accounts", {});
+}
+
+function saveLocalAccounts(accounts) {
+  localStorage.setItem("boris-web-studio-admin-accounts", JSON.stringify(accounts));
+}
+
+async function loadAccountsData() {
+  const cloudAccountsUrl = getCloudAccountsUrl();
+
+  if (cloudAccountsUrl) {
+    return normalizeRecordList(await requestJson(`${cloudAccountsUrl}?v=${Date.now()}`));
+  }
+
+  return normalizeRecordList(getLocalAccounts());
+}
+
+async function saveAccount(username, password) {
+  const account = {
+    username,
+    password,
+    createdAt: new Date().toISOString(),
+  };
+  const cloudAccountsUrl = getCloudAccountsUrl();
+
+  if (cloudAccountsUrl) {
+    await requestJson(`${cloudAccountsUrl}/${encodeURIComponent(username)}.json`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(account),
+    });
+    return account;
+  }
+
+  const accounts = getLocalAccounts();
+  accounts[username] = account;
+  saveLocalAccounts(accounts);
+  return account;
+}
+
+async function deleteAccount(username) {
+  const cloudAccountsUrl = getCloudAccountsUrl();
+
+  if (cloudAccountsUrl) {
+    await requestJson(`${cloudAccountsUrl}/${encodeURIComponent(username)}.json`, {
+      method: "DELETE",
+    });
+    return;
+  }
+
+  const accounts = getLocalAccounts();
+  delete accounts[username];
+  saveLocalAccounts(accounts);
+}
+
+function getLocalLogs() {
+  return readJson("boris-web-studio-admin-logs", []);
+}
+
+function saveLocalLogs(logs) {
+  localStorage.setItem("boris-web-studio-admin-logs", JSON.stringify(logs.slice(0, 100)));
+}
+
+async function addAdminLog(action, details = "") {
+  const log = {
+    action,
+    details,
+    user: currentAdminUser || "owner",
+    createdAt: new Date().toISOString(),
+  };
+  const cloudLogsUrl = getCloudLogsUrl();
+
+  if (cloudLogsUrl) {
+    await requestJson(cloudLogsUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(log),
+    });
+    return;
+  }
+
+  const logs = getLocalLogs();
+  logs.unshift({
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    ...log,
+  });
+  saveLocalLogs(logs);
+}
+
+async function authenticateAdmin(username, password) {
+  if (password === ADMIN_PASSWORD) {
+    return username || "owner";
+  }
+
+  if (!username || !password) {
+    return "";
+  }
+
+  try {
+    const accounts = await loadAccountsData();
+    const match = accounts.find((account) => {
+      return account.username === username && account.password === password;
+    });
+
+    return match ? match.username : "";
+  } catch {
+    return "";
+  }
+}
+
 async function loadOrders() {
   if (!ordersList) {
     return;
@@ -1253,6 +1428,80 @@ async function loadOrders() {
     }).join("");
   } catch {
     ordersList.innerHTML = '<p class="empty-orders">Не успях да заредя заявките. Провери Firebase URL/rules или PHP хостинга.</p>';
+  }
+}
+
+async function loadAccounts() {
+  if (!accountsList) {
+    return;
+  }
+
+  accountsList.innerHTML = '<p class="empty-orders">Зареждане...</p>';
+
+  try {
+    const accounts = await loadAccountsData();
+
+    if (accounts.length === 0) {
+      accountsList.innerHTML = '<p class="empty-orders">Няма създадени акаунти.</p>';
+      return;
+    }
+
+    accountsList.innerHTML = accounts.map((account) => {
+      const createdAt = account.createdAt ? new Date(account.createdAt).toLocaleString("bg-BG") : "";
+
+      return `
+        <article class="order-card">
+          <h4>${escapeHtml(account.username || "-")}</h4>
+          <p><strong>Създаден:</strong> ${escapeHtml(createdAt || "-")}</p>
+          <div class="order-actions-row">
+            <button type="button" class="danger-button" data-account-delete="${escapeHtml(account.username || "")}">Изтрий</button>
+          </div>
+        </article>
+      `;
+    }).join("");
+  } catch {
+    accountsList.innerHTML = '<p class="empty-orders">Не успях да заредя акаунтите. Провери Firebase rules.</p>';
+  }
+}
+
+async function loadLogs() {
+  if (!logsList) {
+    return;
+  }
+
+  logsList.innerHTML = '<p class="empty-orders">Зареждане...</p>';
+
+  try {
+    const cloudLogsUrl = getCloudLogsUrl();
+    let logs = [];
+
+    if (cloudLogsUrl) {
+      logs = normalizeRecordList(await requestJson(`${cloudLogsUrl}?v=${Date.now()}`));
+    } else {
+      logs = normalizeRecordList(getLocalLogs());
+    }
+
+    logs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+    if (logs.length === 0) {
+      logsList.innerHTML = '<p class="empty-orders">Още няма логове.</p>';
+      return;
+    }
+
+    logsList.innerHTML = logs.slice(0, 100).map((log) => {
+      const createdAt = log.createdAt ? new Date(log.createdAt).toLocaleString("bg-BG") : "";
+
+      return `
+        <article class="order-card log-card">
+          <h4>${escapeHtml(log.action || "-")}</h4>
+          <p><strong>Потребител:</strong> ${escapeHtml(log.user || "-")}</p>
+          <p><strong>Детайли:</strong> ${escapeHtml(log.details || "-")}</p>
+          <time>${escapeHtml(createdAt)}</time>
+        </article>
+      `;
+    }).join("");
+  } catch {
+    logsList.innerHTML = '<p class="empty-orders">Не успях да заредя логовете. Провери Firebase rules.</p>';
   }
 }
 
@@ -1334,6 +1583,8 @@ function initImageUploads() {
       if (uploadStatus) {
         uploadStatus.textContent = "Снимките са качени и запазени.";
       }
+
+      await addAdminLog("Качени снимки", "Обновени изображения от admin панела").catch(() => {});
     } catch {
       if (uploadStatus) {
         uploadStatus.textContent = "Не успях да кача снимките. Нужно е PHP хостинг и writable uploads папка.";
@@ -1393,8 +1644,10 @@ function initOrders() {
       try {
         if (deleteButton) {
           await deleteOrder(orderId);
+          await addAdminLog("Изтрита поръчка", orderId).catch(() => {});
         } else {
           await updateOrderStatus(orderId, statusButton.dataset.orderStatus);
+          await addAdminLog("Променен статус на поръчка", `${orderId}: ${statusButton.dataset.orderStatus}`).catch(() => {});
         }
 
         await loadOrders();
@@ -1405,6 +1658,82 @@ function initOrders() {
           '<p class="empty-orders">Не успях да обновя поръчката. Провери Firebase rules.</p>'
         );
       }
+    });
+  }
+}
+
+function initAccounts() {
+  if (refreshAccountsButton) {
+    refreshAccountsButton.addEventListener("click", () => {
+      loadAccounts();
+    });
+  }
+
+  if (accountForm) {
+    accountForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const data = new FormData(accountForm);
+      const username = String(data.get("username") || "").trim();
+      const password = String(data.get("password") || "").trim();
+
+      if (!username || !password) {
+        if (accountStatus) {
+          accountStatus.textContent = "Попълни потребител и парола.";
+        }
+        return;
+      }
+
+      try {
+        await saveAccount(username, password);
+        await addAdminLog("Създаден admin акаунт", username);
+        accountForm.reset();
+
+        if (accountStatus) {
+          accountStatus.textContent = "Акаунтът е създаден.";
+        }
+
+        await loadAccounts();
+      } catch {
+        if (accountStatus) {
+          accountStatus.textContent = "Не успях да създам акаунта. Провери Firebase rules.";
+        }
+      }
+    });
+  }
+
+  if (accountsList) {
+    accountsList.addEventListener("click", async (event) => {
+      const button = event.target.closest("[data-account-delete]");
+
+      if (!button) {
+        return;
+      }
+
+      const username = button.dataset.accountDelete;
+
+      if (!username) {
+        return;
+      }
+
+      button.disabled = true;
+
+      try {
+        await deleteAccount(username);
+        await addAdminLog("Изтрит admin акаунт", username);
+        await loadAccounts();
+      } catch {
+        button.disabled = false;
+        if (accountStatus) {
+          accountStatus.textContent = "Не успях да изтрия акаунта.";
+        }
+      }
+    });
+  }
+
+  if (refreshLogsButton) {
+    refreshLogsButton.addEventListener("click", () => {
+      loadLogs();
     });
   }
 }
@@ -1421,6 +1750,7 @@ async function init() {
   initChatbot();
   initCheckout();
   initOrders();
+  initAccounts();
   initImageUploads();
   initAdminTabs();
 
@@ -1432,19 +1762,26 @@ async function init() {
   startSettingsSync();
 
   if (adminLogin && sessionStorage.getItem(ADMIN_SESSION_KEY) === "true") {
+    currentAdminUser = sessionStorage.getItem(ADMIN_USER_KEY) || "owner";
     unlockAdmin();
   }
 
   if (adminLogin) {
-    adminLogin.addEventListener("submit", (event) => {
+    adminLogin.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      if (adminPassword.value === ADMIN_PASSWORD) {
+      const username = String(adminUsername?.value || "").trim();
+      const password = String(adminPassword.value || "").trim();
+      const authenticatedUser = await authenticateAdmin(username, password);
+
+      if (authenticatedUser) {
+        currentAdminUser = authenticatedUser;
+        await addAdminLog("Вход в admin панела", authenticatedUser).catch(() => {});
         unlockAdmin();
         return;
       }
 
-      passwordStatus.textContent = "Грешна парола.";
+      passwordStatus.textContent = "Грешен потребител или парола.";
       adminPassword.value = "";
       adminPassword.focus();
     });
@@ -1492,6 +1829,7 @@ async function init() {
           savedSettings.discounts || discounts,
           savedSettings.updatedAt || ""
         );
+        await addAdminLog("Запазени настройки", "Текстове, цени или отстъпки").catch(() => {});
         showStatus("Запазено за всички посетители.");
       } catch {
         showStatus("Не е записано за всички. Ако сайтът е в GitHub Pages, добави Firebase URL в sync-config.js.");
@@ -1525,6 +1863,7 @@ async function init() {
           savedSettings.discounts || discounts,
           savedSettings.updatedAt || ""
         );
+        await addAdminLog("Изчистени отстъпки", "Всички отстъпки са върнати на 0").catch(() => {});
         showStatus("Отстъпките са изчистени за всички.");
       } catch {
         showStatus("Не е изчистено за всички. Ако сайтът е в GitHub Pages, добави Firebase URL в sync-config.js.");

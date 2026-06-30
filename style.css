@@ -1171,6 +1171,44 @@ footer {
   gap: 14px;
 }
 
+.account-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  margin: 18px 0;
+  align-items: end;
+}
+
+.account-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 850;
+}
+
+.account-form input {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: rgba(2, 10, 6, 0.74);
+  font: inherit;
+}
+
+.account-form button {
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: var(--radius);
+  color: #031008;
+  background: linear-gradient(135deg, var(--green-2), var(--green));
+  font: inherit;
+  font-weight: 950;
+  cursor: pointer;
+}
+
 .order-card {
   padding: 18px;
   box-shadow: none;
@@ -1243,6 +1281,13 @@ footer {
 
 .empty-orders {
   color: var(--muted);
+}
+
+.log-card time {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .discount-form {
@@ -1435,6 +1480,10 @@ footer {
   }
 
   .order-form {
+    grid-template-columns: 1fr;
+  }
+
+  .account-form {
     grid-template-columns: 1fr;
   }
 
