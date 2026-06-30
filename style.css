@@ -715,6 +715,13 @@ h2 {
   outline: none;
 }
 
+.order-form input[readonly] {
+  color: var(--green-2);
+  background: rgba(34, 197, 94, 0.1);
+  font-weight: 950;
+  cursor: not-allowed;
+}
+
 .order-form button {
   min-height: 50px;
   border: 0;

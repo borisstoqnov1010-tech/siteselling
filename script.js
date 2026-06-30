@@ -83,6 +83,8 @@ const discordOrderLink = document.querySelector("[data-discord-order]");
 const checkoutCloseButtons = Array.from(document.querySelectorAll("[data-checkout-close]"));
 const orderForm = document.querySelector("[data-order-form]");
 const orderStatus = document.querySelector("[data-order-status]");
+const orderPriceInput = document.querySelector("[data-order-price]");
+const orderServiceKeyInput = document.querySelector("[data-order-service-key]");
 const ordersPanel = document.querySelector("#ordersPanel");
 const ordersList = document.querySelector("[data-orders-list]");
 const refreshOrdersButton = document.querySelector("[data-refresh-orders]");
@@ -633,6 +635,27 @@ function getDiscountedPrice(basePrice, discount) {
   return basePrice - (basePrice * discount) / 100;
 }
 
+function getCurrentServicePrice(service) {
+  const card = document.querySelector(`[data-service="${service}"]`);
+  const price = card?.querySelector("[data-price-output]")?.textContent?.trim();
+
+  return price || "";
+}
+
+function updateOrderPriceFromSelection() {
+  if (!orderForm || !orderPriceInput || !orderServiceKeyInput) {
+    return;
+  }
+
+  const serviceSelect = orderForm.elements.service;
+  const selectedOption = serviceSelect?.selectedOptions?.[0];
+  const serviceKey = selectedOption?.dataset.serviceKey || "";
+  const price = serviceKey ? getCurrentServicePrice(serviceKey) : "";
+
+  orderServiceKeyInput.value = serviceKey;
+  orderPriceInput.value = price;
+}
+
 function applyDiscounts(discounts) {
   serviceCards.forEach((card) => {
     const service = card.dataset.service;
@@ -653,6 +676,8 @@ function applyDiscounts(discounts) {
         : "";
     }
   });
+
+  updateOrderPriceFromSelection();
 }
 
 function updateDurationFields() {
@@ -1604,8 +1629,23 @@ function initImageUploads() {
 
 function initOrders() {
   if (orderForm) {
+    orderForm.addEventListener("change", (event) => {
+      if (event.target.name === "service") {
+        updateOrderPriceFromSelection();
+      }
+    });
+
     orderForm.addEventListener("submit", async (event) => {
       event.preventDefault();
+
+      updateOrderPriceFromSelection();
+
+      if (!orderPriceInput?.value) {
+        if (orderStatus) {
+          orderStatus.textContent = "Първо избери пакет, за да се зададе цената.";
+        }
+        return;
+      }
 
       if (orderStatus) {
         orderStatus.textContent = "Изпращане...";
@@ -1614,6 +1654,7 @@ function initOrders() {
       try {
         await submitOrder(orderForm);
         orderForm.reset();
+        updateOrderPriceFromSelection();
 
         if (orderStatus) {
           orderStatus.textContent = "Заявката е изпратена успешно.";
