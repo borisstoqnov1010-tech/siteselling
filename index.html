@@ -308,7 +308,11 @@
         За най-сигурно може да минеш през Discord, а ако имаш активен payment link, можеш да платиш веднага онлайн.
       </p>
       <div class="checkout-actions">
-        <a class="checkout-pay" href="#" data-pay-now target="_blank" rel="noopener">Плати сега в сайта</a>
+        <button class="checkout-pay" type="button" data-pay-now>Плати сега в сайта</button>
+        <div class="payment-methods is-hidden" data-payment-methods>
+          <a class="payment-method" href="#" data-pay-revolut target="_blank" rel="noopener">Revolut</a>
+          <a class="payment-method" href="#" data-pay-paypal target="_blank" rel="noopener">PayPal</a>
+        </div>
         <a class="checkout-discord" href="https://discord.gg/sSkQC2UmkY" data-discord-order target="_blank" rel="noopener">Поръчай в Discord</a>
       </div>
       <p class="checkout-status" data-checkout-status aria-live="polite"></p>

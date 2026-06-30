@@ -793,6 +793,9 @@ h2 {
   padding: 13px 16px;
   font-weight: 950;
   text-decoration: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
 .checkout-pay {
@@ -803,6 +806,35 @@ h2 {
 .checkout-pay.is-disabled {
   pointer-events: none;
   opacity: 0.55;
+}
+
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.payment-method {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: rgba(34, 197, 94, 0.1);
+  font-weight: 950;
+  text-decoration: none;
+}
+
+.payment-method:hover {
+  border-color: var(--line-strong);
+  background: rgba(34, 197, 94, 0.16);
+}
+
+.payment-method.is-disabled {
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 .checkout-discord {

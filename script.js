@@ -67,6 +67,9 @@ const checkoutTitle = document.querySelector("[data-checkout-title]");
 const checkoutPrice = document.querySelector("[data-checkout-price]");
 const checkoutStatus = document.querySelector("[data-checkout-status]");
 const payNowLink = document.querySelector("[data-pay-now]");
+const paymentMethods = document.querySelector("[data-payment-methods]");
+const payRevolutLink = document.querySelector("[data-pay-revolut]");
+const payPaypalLink = document.querySelector("[data-pay-paypal]");
 const discordOrderLink = document.querySelector("[data-discord-order]");
 const checkoutCloseButtons = Array.from(document.querySelectorAll("[data-checkout-close]"));
 const orderForm = document.querySelector("[data-order-form]");
@@ -129,9 +132,27 @@ function getDiscordInvite() {
 }
 
 function getPaymentLink(service) {
-  const links = window.BORIS_PAYMENT_LINKS || {};
+  const methods = getPaymentMethods(service);
 
-  return String(links[service] || links.default || "").trim();
+  return methods.revolut || methods.paypal;
+}
+
+function getPaymentMethods(service) {
+  const links = window.BORIS_PAYMENT_LINKS || {};
+  const serviceLinks = links[service] || {};
+  const defaultLinks = links.default || {};
+
+  if (typeof serviceLinks === "string" || typeof defaultLinks === "string") {
+    return {
+      revolut: "",
+      paypal: String(serviceLinks || defaultLinks || "").trim(),
+    };
+  }
+
+  return {
+    revolut: String(serviceLinks.revolut || defaultLinks.revolut || "").trim(),
+    paypal: String(serviceLinks.paypal || defaultLinks.paypal || "").trim(),
+  };
 }
 
 async function requestJson(url, options = {}) {
@@ -793,7 +814,8 @@ function openCheckout(service) {
   const card = document.querySelector(`[data-service="${service}"]`);
   const title = card?.querySelector("h3")?.textContent?.trim() || "Пакет";
   const price = card?.querySelector("[data-price-output]")?.textContent?.trim() || "";
-  const paymentLink = getPaymentLink(service);
+  const paymentMethodsForService = getPaymentMethods(service);
+  const hasPaymentMethod = Boolean(paymentMethodsForService.revolut || paymentMethodsForService.paypal);
   const discordInvite = getDiscordInvite();
 
   if (checkoutTitle) {
@@ -809,15 +831,30 @@ function openCheckout(service) {
   }
 
   if (payNowLink) {
-    payNowLink.href = paymentLink || "#";
-    payNowLink.classList.toggle("is-disabled", !paymentLink);
-    payNowLink.setAttribute("aria-disabled", String(!paymentLink));
+    payNowLink.classList.toggle("is-disabled", !hasPaymentMethod);
+    payNowLink.setAttribute("aria-disabled", String(!hasPaymentMethod));
+  }
+
+  if (paymentMethods) {
+    paymentMethods.classList.add("is-hidden");
+  }
+
+  if (payRevolutLink) {
+    payRevolutLink.href = paymentMethodsForService.revolut || "#";
+    payRevolutLink.classList.toggle("is-disabled", !paymentMethodsForService.revolut);
+    payRevolutLink.setAttribute("aria-disabled", String(!paymentMethodsForService.revolut));
+  }
+
+  if (payPaypalLink) {
+    payPaypalLink.href = paymentMethodsForService.paypal || "#";
+    payPaypalLink.classList.toggle("is-disabled", !paymentMethodsForService.paypal);
+    payPaypalLink.setAttribute("aria-disabled", String(!paymentMethodsForService.paypal));
   }
 
   if (checkoutStatus) {
-    checkoutStatus.textContent = paymentLink
-      ? "Онлайн плащането ще отвори защитен payment link. Discord остава вариант, ако искаш първо да уточним проекта."
-      : "Онлайн плащането още няма зададен payment link. Избери Discord за най-сигурна поръчка.";
+    checkoutStatus.textContent = hasPaymentMethod
+      ? "Натисни плащане и избери Revolut или PayPal. Discord остава вариант, ако искаш първо да уточним проекта."
+      : "Онлайн плащането още няма зададен Revolut или PayPal линк. Избери Discord за най-сигурна поръчка.";
   }
 
   checkoutModal.classList.remove("is-hidden");
@@ -834,6 +871,20 @@ function initCheckout() {
   checkoutCloseButtons.forEach((button) => {
     button.addEventListener("click", closeCheckout);
   });
+
+  if (payNowLink && paymentMethods) {
+    payNowLink.addEventListener("click", () => {
+      if (payNowLink.classList.contains("is-disabled")) {
+        return;
+      }
+
+      paymentMethods.classList.toggle("is-hidden");
+
+      if (checkoutStatus) {
+        checkoutStatus.textContent = "Избери Revolut или PayPal, за да продължиш към плащане.";
+      }
+    });
+  }
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
