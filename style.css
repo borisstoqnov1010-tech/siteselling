@@ -1236,6 +1236,25 @@ footer {
   color: var(--green-2);
 }
 
+.account-password-field {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  color: var(--text);
+  font-weight: 850;
+}
+
+.account-password-field input {
+  width: min(360px, 100%);
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: rgba(2, 10, 6, 0.74);
+  font: inherit;
+}
+
 .order-status-badge {
   display: inline-flex;
   width: fit-content;

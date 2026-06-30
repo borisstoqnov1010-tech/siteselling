@@ -1113,6 +1113,14 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
+function escapeSelector(value) {
+  if (window.CSS?.escape) {
+    return CSS.escape(value);
+  }
+
+  return String(value).replace(/["\\]/g, "\\$&");
+}
+
 function createOrder(payload) {
   return {
     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -1298,16 +1306,28 @@ function saveLocalAccounts(accounts) {
 
 async function loadAccountsData() {
   const cloudAccountsUrl = getCloudAccountsUrl();
+  const localAccounts = normalizeRecordList(getLocalAccounts());
 
   if (cloudAccountsUrl) {
     try {
-      return normalizeRecordList(await requestJson(`${cloudAccountsUrl}?v=${Date.now()}`));
+      const cloudAccounts = normalizeRecordList(await requestJson(`${cloudAccountsUrl}?v=${Date.now()}`));
+      const merged = new Map();
+
+      cloudAccounts.forEach((account) => {
+        merged.set(account.username || account.storageId, account);
+      });
+
+      localAccounts.forEach((account) => {
+        merged.set(account.username || account.storageId, account);
+      });
+
+      return Array.from(merged.values());
     } catch {
-      return normalizeRecordList(getLocalAccounts());
+      return localAccounts;
     }
   }
 
-  return normalizeRecordList(getLocalAccounts());
+  return localAccounts;
 }
 
 async function saveAccount(username, password) {
@@ -1315,6 +1335,7 @@ async function saveAccount(username, password) {
     username,
     password,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
   const cloudAccountsUrl = getCloudAccountsUrl();
 
@@ -1332,6 +1353,38 @@ async function saveAccount(username, password) {
   }
 
   const accounts = getLocalAccounts();
+  accounts[username] = account;
+  saveLocalAccounts(accounts);
+  return account;
+}
+
+async function updateAccountPassword(username, password) {
+  const accounts = getLocalAccounts();
+  const existing = accounts[username] || {};
+  const account = {
+    ...existing,
+    username,
+    password,
+    createdAt: existing.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  const cloudAccountsUrl = getCloudAccountsUrl();
+
+  if (cloudAccountsUrl) {
+    try {
+      await requestJson(`${cloudAccountsUrl}/${encodeURIComponent(username)}.json`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          password,
+          updatedAt: account.updatedAt,
+        }),
+      });
+    } catch {}
+  }
+
   accounts[username] = account;
   saveLocalAccounts(accounts);
   return account;
@@ -1368,6 +1421,10 @@ async function addAdminLog(action, details = "") {
     action,
     details,
     user: currentAdminUser || "owner",
+    page: window.location.pathname || "admin",
+    url: window.location.href,
+    userAgent: navigator.userAgent,
+    language: navigator.language || "",
     createdAt: new Date().toISOString(),
   };
   const cloudLogsUrl = getCloudLogsUrl();
@@ -1535,13 +1592,21 @@ async function loadAccounts() {
 
     accountsList.innerHTML = accounts.map((account) => {
       const createdAt = account.createdAt ? new Date(account.createdAt).toLocaleString("bg-BG") : "";
+      const updatedAt = account.updatedAt ? new Date(account.updatedAt).toLocaleString("bg-BG") : "";
+      const username = account.username || account.storageId || "";
 
       return `
         <article class="order-card">
-          <h4>${escapeHtml(account.username || "-")}</h4>
+          <h4>${escapeHtml(username || "-")}</h4>
           <p><strong>Създаден:</strong> ${escapeHtml(createdAt || "-")}</p>
+          <p><strong>Последна промяна:</strong> ${escapeHtml(updatedAt || "-")}</p>
+          <label class="account-password-field">
+            Нова парола
+            <input type="password" data-account-password="${escapeHtml(username)}" placeholder="Нова парола">
+          </label>
           <div class="order-actions-row">
-            <button type="button" class="danger-button" data-account-delete="${escapeHtml(account.username || "")}">Изтрий</button>
+            <button type="button" data-account-password-save="${escapeHtml(username)}">Смени парола</button>
+            <button type="button" class="danger-button" data-account-delete="${escapeHtml(username)}">Изтрий</button>
           </div>
         </article>
       `;
@@ -1583,6 +1648,9 @@ async function loadLogs() {
           <h4>${escapeHtml(log.action || "-")}</h4>
           <p><strong>Потребител:</strong> ${escapeHtml(log.user || "-")}</p>
           <p><strong>Детайли:</strong> ${escapeHtml(log.details || "-")}</p>
+          <p><strong>Страница:</strong> ${escapeHtml(log.page || "-")}</p>
+          <p><strong>Език:</strong> ${escapeHtml(log.language || "-")}</p>
+          <p><strong>Браузър:</strong> ${escapeHtml(log.userAgent || "-")}</p>
           <time>${escapeHtml(createdAt)}</time>
         </article>
       `;
@@ -1804,11 +1872,11 @@ function initAccounts() {
 
       try {
         await saveAccount(username, password);
-        await addAdminLog("Създаден admin акаунт", username);
+        await addAdminLog("Създаден admin акаунт", `username=${username}`);
         accountForm.reset();
 
         if (accountStatus) {
-          accountStatus.textContent = "Акаунтът е създаден.";
+          accountStatus.textContent = "Акаунтът е създаден и вече може да се ползва.";
         }
 
         await loadAccounts();
@@ -1822,13 +1890,15 @@ function initAccounts() {
 
   if (accountsList) {
     accountsList.addEventListener("click", async (event) => {
-      const button = event.target.closest("[data-account-delete]");
+      const passwordButton = event.target.closest("[data-account-password-save]");
+      const deleteButton = event.target.closest("[data-account-delete]");
+      const button = passwordButton || deleteButton;
 
       if (!button) {
         return;
       }
 
-      const username = button.dataset.accountDelete;
+      const username = button.dataset.accountDelete || button.dataset.accountPasswordSave;
 
       if (!username) {
         return;
@@ -1837,13 +1907,38 @@ function initAccounts() {
       button.disabled = true;
 
       try {
-        await deleteAccount(username);
-        await addAdminLog("Изтрит admin акаунт", username);
+        if (passwordButton) {
+          const passwordInput = accountsList.querySelector(`[data-account-password="${escapeSelector(username)}"]`);
+          const nextPassword = String(passwordInput?.value || "").trim();
+
+          if (!nextPassword) {
+            if (accountStatus) {
+              accountStatus.textContent = "Въведи нова парола.";
+            }
+            button.disabled = false;
+            return;
+          }
+
+          await updateAccountPassword(username, nextPassword);
+          await addAdminLog("Сменена парола на admin акаунт", username);
+
+          if (accountStatus) {
+            accountStatus.textContent = "Паролата е сменена.";
+          }
+        } else {
+          await deleteAccount(username);
+          await addAdminLog("Изтрит admin акаунт", username);
+
+          if (accountStatus) {
+            accountStatus.textContent = "Акаунтът е изтрит.";
+          }
+        }
+
         await loadAccounts();
       } catch {
         button.disabled = false;
         if (accountStatus) {
-          accountStatus.textContent = "Не успях да изтрия акаунта.";
+          accountStatus.textContent = "Не успях да обновя акаунта.";
         }
       }
     });
