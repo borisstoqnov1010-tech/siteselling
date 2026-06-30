@@ -10,7 +10,7 @@
 <body>
   <header class="site-header">
     <a class="brand" href="index.html" aria-label="Boris Web Studio">
-      <img src="favicon.png" alt="" class="brand-mark">
+      <img src="favicon.png" alt="" class="brand-mark" data-image="logoImage">
       <span>Boris Web Studio</span>
     </a>
 
@@ -122,6 +122,91 @@
                 <textarea name="customDescription" rows="2"></textarea>
               </label>
             </div>
+
+            <div class="content-grid">
+              <label>
+                Галерия 1 заглавие
+                <input type="text" name="galleryOneTitle">
+              </label>
+              <label class="wide-field">
+                Галерия 1 описание
+                <textarea name="galleryOneDescription" rows="2"></textarea>
+              </label>
+              <label>
+                Галерия 2 заглавие
+                <input type="text" name="galleryTwoTitle">
+              </label>
+              <label class="wide-field">
+                Галерия 2 описание
+                <textarea name="galleryTwoDescription" rows="2"></textarea>
+              </label>
+              <label>
+                Галерия 3 заглавие
+                <input type="text" name="galleryThreeTitle">
+              </label>
+              <label class="wide-field">
+                Галерия 3 описание
+                <textarea name="galleryThreeDescription" rows="2"></textarea>
+              </label>
+            </div>
+
+            <div class="content-grid">
+              <label class="wide-field">
+                Мнение 1
+                <textarea name="reviewOneText" rows="2"></textarea>
+              </label>
+              <label>
+                Автор 1
+                <input type="text" name="reviewOneAuthor">
+              </label>
+              <label class="wide-field">
+                Мнение 2
+                <textarea name="reviewTwoText" rows="2"></textarea>
+              </label>
+              <label>
+                Автор 2
+                <input type="text" name="reviewTwoAuthor">
+              </label>
+              <label class="wide-field">
+                Мнение 3
+                <textarea name="reviewThreeText" rows="2"></textarea>
+              </label>
+              <label>
+                Автор 3
+                <input type="text" name="reviewThreeAuthor">
+              </label>
+            </div>
+          </div>
+
+          <div class="image-manager">
+            <h4>Снимки</h4>
+            <p>Качи ново лого, hero снимка или gallery изображения. След upload се виждат от всички посетители.</p>
+
+            <div class="image-grid">
+              <label>
+                Лого / favicon
+                <input type="file" name="logoImage" accept="image/*">
+              </label>
+              <label>
+                Hero снимка
+                <input type="file" name="heroImage" accept="image/*">
+              </label>
+              <label>
+                Галерия 1
+                <input type="file" name="galleryOneImage" accept="image/*">
+              </label>
+              <label>
+                Галерия 2
+                <input type="file" name="galleryTwoImage" accept="image/*">
+              </label>
+              <label>
+                Галерия 3
+                <input type="file" name="galleryThreeImage" accept="image/*">
+              </label>
+            </div>
+
+            <button type="button" class="upload-button" data-upload-images>Качи снимките</button>
+            <p class="admin-status" data-upload-status aria-live="polite"></p>
           </div>
 
           <div class="discount-item" data-admin-service="cs2" data-admin-price="4">

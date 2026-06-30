@@ -22,6 +22,23 @@ const defaultContent = {
   customTitle: "Сайт по избор",
   customDescription: "Персонален сайт според твоята идея: портфолио, магазин, landing page или проект.",
   customPrice: "10",
+  galleryOneTitle: "CS 2 landing page",
+  galleryOneDescription: "Hero секция, IP адрес, Discord бутон, правила и сървър статус.",
+  galleryTwoTitle: "Minecraft community",
+  galleryTwoDescription: "Режими, снимки, правила, join секция и информация за играчите.",
+  galleryThreeTitle: "Custom project",
+  galleryThreeDescription: "Портфолио, бизнес сайт или online presence с уникална структура.",
+  reviewOneText: "“Сайтът стана бързо и изглежда много по-сериозно от стария ни Discord invite.”",
+  reviewOneAuthor: "CS 2 клиент",
+  reviewTwoText: "“Хареса ми, че работи добре на телефон и всичко е подредено ясно.”",
+  reviewTwoAuthor: "Minecraft проект",
+  reviewThreeText: "“Получих точния стил, който исках, плюс лесен начин хората да поръчват.”",
+  reviewThreeAuthor: "Custom сайт",
+  logoImage: "favicon.png",
+  heroImage: "favicon.png",
+  galleryOneImage: "",
+  galleryTwoImage: "",
+  galleryThreeImage: "",
 };
 
 const adminLogin = document.querySelector("#adminLogin");
@@ -45,6 +62,9 @@ const orderStatus = document.querySelector("[data-order-status]");
 const ordersPanel = document.querySelector("#ordersPanel");
 const ordersList = document.querySelector("[data-orders-list]");
 const refreshOrdersButton = document.querySelector("[data-refresh-orders]");
+const uploadImagesButton = document.querySelector("[data-upload-images]");
+const uploadStatus = document.querySelector("[data-upload-status]");
+const IMAGE_KEYS = ["logoImage", "heroImage", "galleryOneImage", "galleryTwoImage", "galleryThreeImage"];
 
 function readJson(key, fallback = {}) {
   try {
@@ -138,6 +158,30 @@ function saveContent(content) {
   localStorage.setItem(CONTENT_KEY, JSON.stringify(content));
 }
 
+function applyImages(content) {
+  if (content.logoImage) {
+    document.querySelectorAll('link[rel="icon"]').forEach((link) => {
+      link.href = content.logoImage;
+    });
+  }
+
+  document.querySelectorAll("[data-image]").forEach((element) => {
+    const key = element.dataset.image;
+    const imageUrl = content[key] || defaultContent[key] || "";
+
+    if (!imageUrl) {
+      element.classList.add("is-hidden");
+      return;
+    }
+
+    if (element.tagName === "IMG") {
+      element.src = imageUrl;
+    }
+
+    element.classList.remove("is-hidden");
+  });
+}
+
 function applyContent(content) {
   document.querySelectorAll("[data-content]").forEach((element) => {
     const key = element.dataset.content;
@@ -146,6 +190,8 @@ function applyContent(content) {
       element.textContent = content[key];
     }
   });
+
+  applyImages(content);
 
   SERVICES.forEach((service) => {
     const price = normalizePrice(content[`${service}Price`], defaultContent[`${service}Price`]);
@@ -171,6 +217,10 @@ function fillContentForm(content) {
   }
 
   Object.entries(content).forEach(([key, value]) => {
+    if (IMAGE_KEYS.includes(key)) {
+      return;
+    }
+
     if (form.elements[key]) {
       form.elements[key].value = value;
     }
@@ -185,6 +235,10 @@ function getContentFromForm() {
   const content = getContent();
 
   Object.keys(defaultContent).forEach((key) => {
+    if (IMAGE_KEYS.includes(key)) {
+      return;
+    }
+
     if (!form.elements[key]) {
       return;
     }
@@ -574,6 +628,92 @@ async function loadOrders() {
   }
 }
 
+async function uploadImages() {
+  if (!form || !uploadImagesButton) {
+    return;
+  }
+
+  const uploadData = new FormData();
+  let hasFile = false;
+
+  uploadData.append("password", ADMIN_PASSWORD);
+
+  IMAGE_KEYS.forEach((key) => {
+    const input = form.elements[key];
+
+    if (input?.files?.[0]) {
+      uploadData.append(key, input.files[0]);
+      hasFile = true;
+    }
+  });
+
+  if (!hasFile) {
+    if (uploadStatus) {
+      uploadStatus.textContent = "Избери поне една снимка.";
+    }
+    return;
+  }
+
+  if (uploadStatus) {
+    uploadStatus.textContent = "Качване...";
+  }
+
+  const response = await fetch("upload.php", {
+    method: "POST",
+    body: uploadData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Image upload failed");
+  }
+
+  return response.json();
+}
+
+function initImageUploads() {
+  if (!uploadImagesButton) {
+    return;
+  }
+
+  uploadImagesButton.addEventListener("click", async () => {
+    try {
+      const result = await uploadImages();
+
+      if (!result?.content) {
+        return;
+      }
+
+      const content = {
+        ...getContentFromForm(),
+        ...result.content,
+      };
+      const discounts = form ? getFormDiscounts() : loadDiscounts();
+
+      applyContent(content);
+      fillContentForm(content);
+      saveContent(content);
+      saveDiscounts(discounts);
+      updateAdminPreview(discounts);
+
+      IMAGE_KEYS.forEach((key) => {
+        const input = form.elements[key];
+
+        if (input) {
+          input.value = "";
+        }
+      });
+
+      if (uploadStatus) {
+        uploadStatus.textContent = "Снимките са качени и запазени.";
+      }
+    } catch {
+      if (uploadStatus) {
+        uploadStatus.textContent = "Не успях да кача снимките. Нужно е PHP хостинг и writable uploads папка.";
+      }
+    }
+  });
+}
+
 function initOrders() {
   if (orderForm) {
     orderForm.addEventListener("submit", async (event) => {
@@ -616,6 +756,7 @@ async function init() {
 
   initChatbot();
   initOrders();
+  initImageUploads();
 
   const sharedState = await loadSharedState();
   const content = sharedState.content;

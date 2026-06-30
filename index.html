@@ -11,7 +11,7 @@
 <body>
   <header class="site-header">
     <a class="brand" href="#home" aria-label="Boris Web Studio">
-      <img src="favicon.png" alt="" class="brand-mark">
+      <img src="favicon.png" alt="" class="brand-mark" data-image="logoImage">
       <span>Boris Web Studio</span>
     </a>
 
@@ -60,7 +60,7 @@
 
       <div class="hero-visual" aria-hidden="true">
         <div class="logo-orbit">
-          <img src="favicon.png" alt="">
+          <img src="favicon.png" alt="" data-image="heroImage">
         </div>
         <div class="terminal-card">
           <span class="dot"></span>
@@ -83,29 +83,32 @@
       <div class="gallery-grid">
         <article class="gallery-card">
           <div class="gallery-preview server-preview">
+            <img src="" alt="" data-image="galleryOneImage" class="managed-image is-hidden">
             <span>CS2</span>
             <strong>Server Hub</strong>
           </div>
-          <h3>CS 2 landing page</h3>
-          <p>Hero секция, IP адрес, Discord бутон, правила и сървър статус.</p>
+          <h3 data-content="galleryOneTitle">CS 2 landing page</h3>
+          <p data-content="galleryOneDescription">Hero секция, IP адрес, Discord бутон, правила и сървър статус.</p>
         </article>
 
         <article class="gallery-card">
           <div class="gallery-preview minecraft-preview">
+            <img src="" alt="" data-image="galleryTwoImage" class="managed-image is-hidden">
             <span>MC</span>
             <strong>Realm Site</strong>
           </div>
-          <h3>Minecraft community</h3>
-          <p>Режими, снимки, правила, join секция и информация за играчите.</p>
+          <h3 data-content="galleryTwoTitle">Minecraft community</h3>
+          <p data-content="galleryTwoDescription">Режими, снимки, правила, join секция и информация за играчите.</p>
         </article>
 
         <article class="gallery-card">
           <div class="gallery-preview custom-preview">
+            <img src="" alt="" data-image="galleryThreeImage" class="managed-image is-hidden">
             <span>WEB</span>
             <strong>Custom Brand</strong>
           </div>
-          <h3>Custom project</h3>
-          <p>Портфолио, бизнес сайт или online presence с уникална структура.</p>
+          <h3 data-content="galleryThreeTitle">Custom project</h3>
+          <p data-content="galleryThreeDescription">Портфолио, бизнес сайт или online presence с уникална структура.</p>
         </article>
       </div>
     </section>
@@ -118,16 +121,16 @@
 
       <div class="reviews-grid">
         <article class="review-card">
-          <p>“Сайтът стана бързо и изглежда много по-сериозно от стария ни Discord invite.”</p>
-          <strong>CS 2 клиент</strong>
+          <p data-content="reviewOneText">“Сайтът стана бързо и изглежда много по-сериозно от стария ни Discord invite.”</p>
+          <strong data-content="reviewOneAuthor">CS 2 клиент</strong>
         </article>
         <article class="review-card">
-          <p>“Хареса ми, че работи добре на телефон и всичко е подредено ясно.”</p>
-          <strong>Minecraft проект</strong>
+          <p data-content="reviewTwoText">“Хареса ми, че работи добре на телефон и всичко е подредено ясно.”</p>
+          <strong data-content="reviewTwoAuthor">Minecraft проект</strong>
         </article>
         <article class="review-card">
-          <p>“Получих точния стил, който исках, плюс лесен начин хората да поръчват.”</p>
-          <strong>Custom сайт</strong>
+          <p data-content="reviewThreeText">“Получих точния стил, който исках, плюс лесен начин хората да поръчват.”</p>
+          <strong data-content="reviewThreeAuthor">Custom сайт</strong>
         </article>
       </div>
     </section>
