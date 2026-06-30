@@ -52,6 +52,7 @@ const form = document.querySelector("#discountForm");
 const resetButton = document.querySelector("#resetDiscounts");
 const lockAdminButton = document.querySelector("#lockAdmin");
 const statusText = document.querySelector("#adminStatus");
+const syncStatus = document.querySelector("[data-sync-status]");
 const serviceCards = Array.from(document.querySelectorAll(".service-card"));
 const adminItems = Array.from(document.querySelectorAll(".discount-item"));
 const themeButtons = Array.from(document.querySelectorAll("[data-theme-toggle]"));
@@ -60,6 +61,14 @@ const chatPanel = document.querySelector("[data-chat-panel]");
 const chatClose = document.querySelector("[data-chat-close]");
 const chatForm = document.querySelector("[data-chat-form]");
 const chatMessages = document.querySelector("[data-chat-messages]");
+const orderChoiceButtons = Array.from(document.querySelectorAll("[data-order-choice]"));
+const checkoutModal = document.querySelector("[data-checkout-modal]");
+const checkoutTitle = document.querySelector("[data-checkout-title]");
+const checkoutPrice = document.querySelector("[data-checkout-price]");
+const checkoutStatus = document.querySelector("[data-checkout-status]");
+const payNowLink = document.querySelector("[data-pay-now]");
+const discordOrderLink = document.querySelector("[data-discord-order]");
+const checkoutCloseButtons = Array.from(document.querySelectorAll("[data-checkout-close]"));
 const orderForm = document.querySelector("[data-order-form]");
 const orderStatus = document.querySelector("[data-order-status]");
 const ordersPanel = document.querySelector("#ordersPanel");
@@ -87,6 +96,42 @@ function getCloudSettingsUrl() {
   }
 
   return `${databaseUrl}/settings.json`;
+}
+
+function isGithubPages() {
+  return window.location.hostname.endsWith("github.io");
+}
+
+function getSyncMode() {
+  if (getCloudSettingsUrl()) {
+    return "cloud";
+  }
+
+  if (isGithubPages()) {
+    return "github-unconfigured";
+  }
+
+  return "php";
+}
+
+function setSyncStatus(message, type = "ok") {
+  if (!syncStatus) {
+    return;
+  }
+
+  syncStatus.textContent = message;
+  syncStatus.classList.toggle("is-error", type === "error");
+  syncStatus.classList.toggle("is-ok", type !== "error");
+}
+
+function getDiscordInvite() {
+  return String(window.BORIS_DISCORD_INVITE || "https://discord.gg/sSkQC2UmkY").trim();
+}
+
+function getPaymentLink(service) {
+  const links = window.BORIS_PAYMENT_LINKS || {};
+
+  return String(links[service] || links.default || "").trim();
 }
 
 async function requestJson(url, options = {}) {
@@ -122,14 +167,30 @@ async function loadSharedState() {
   if (cloudSettingsUrl) {
     try {
       const data = await requestJson(`${cloudSettingsUrl}?v=${Date.now()}`);
+      setSyncStatus("Cloud sync е свързан. Промените ще се виждат при всички.");
       return normalizeSharedState(data);
-    } catch {}
+    } catch {
+      setSyncStatus("Cloud sync URL има, но не се зарежда. Провери Firebase rules и URL-а.", "error");
+    }
+  }
+
+  if (getSyncMode() === "github-unconfigured") {
+    setSyncStatus("GitHub Pages няма база. Добави Firebase URL в sync-config.js, иначе промените са само локално.", "error");
+
+    return {
+      content: getContent(),
+      discounts: loadDiscounts(),
+      isShared: false,
+    };
   }
 
   try {
     const data = await requestJson(`${REMOTE_SETTINGS_URL}?v=${Date.now()}`);
+    setSyncStatus("PHP sync е свързан. Промените ще се виждат при всички.");
     return normalizeSharedState(data);
   } catch {
+    setSyncStatus("Няма активна синхронизация. За GitHub Pages сложи Firebase URL в sync-config.js.", "error");
+
     return {
       content: getContent(),
       discounts: loadDiscounts(),
@@ -160,6 +221,10 @@ async function saveSharedState(content, discounts) {
       ok: true,
       settings,
     };
+  }
+
+  if (getSyncMode() === "github-unconfigured") {
+    throw new Error("GitHub Pages needs a Firebase database URL in sync-config.js");
   }
 
   const response = await fetch(REMOTE_SETTINGS_URL, {
@@ -639,7 +704,7 @@ function getLocalServiceSummary() {
 function getLocalChatReply(text) {
   const question = text.toLowerCase();
   const services = getLocalServiceSummary();
-  const discord = "https://discord.gg/sSkQC2UmkY";
+  const discord = getDiscordInvite();
 
   if (question.includes("цена") || question.includes("колко") || question.includes("пакет") || question.includes("отстъп")) {
     return `Ето текущите пакети:\n${services}\n\nЗа поръчка можеш да пишеш в Discord: ${discord}`;
@@ -707,6 +772,72 @@ function initChatbot() {
       thinkingMessage.textContent = data.reply || getLocalChatReply(text);
     } catch {
       thinkingMessage.textContent = getLocalChatReply(text);
+    }
+  });
+}
+
+function closeCheckout() {
+  if (!checkoutModal) {
+    return;
+  }
+
+  checkoutModal.classList.add("is-hidden");
+  checkoutModal.setAttribute("aria-hidden", "true");
+}
+
+function openCheckout(service) {
+  if (!checkoutModal) {
+    return;
+  }
+
+  const card = document.querySelector(`[data-service="${service}"]`);
+  const title = card?.querySelector("h3")?.textContent?.trim() || "Пакет";
+  const price = card?.querySelector("[data-price-output]")?.textContent?.trim() || "";
+  const paymentLink = getPaymentLink(service);
+  const discordInvite = getDiscordInvite();
+
+  if (checkoutTitle) {
+    checkoutTitle.textContent = title;
+  }
+
+  if (checkoutPrice) {
+    checkoutPrice.textContent = price ? `Цена: ${price}` : "";
+  }
+
+  if (discordOrderLink) {
+    discordOrderLink.href = discordInvite;
+  }
+
+  if (payNowLink) {
+    payNowLink.href = paymentLink || "#";
+    payNowLink.classList.toggle("is-disabled", !paymentLink);
+    payNowLink.setAttribute("aria-disabled", String(!paymentLink));
+  }
+
+  if (checkoutStatus) {
+    checkoutStatus.textContent = paymentLink
+      ? "Онлайн плащането ще отвори защитен payment link. Discord остава вариант, ако искаш първо да уточним проекта."
+      : "Онлайн плащането още няма зададен payment link. Избери Discord за най-сигурна поръчка.";
+  }
+
+  checkoutModal.classList.remove("is-hidden");
+  checkoutModal.setAttribute("aria-hidden", "false");
+}
+
+function initCheckout() {
+  orderChoiceButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      openCheckout(button.dataset.orderChoice);
+    });
+  });
+
+  checkoutCloseButtons.forEach((button) => {
+    button.addEventListener("click", closeCheckout);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeCheckout();
     }
   });
 }
@@ -908,6 +1039,7 @@ async function init() {
   });
 
   initChatbot();
+  initCheckout();
   initOrders();
   initImageUploads();
   initAdminTabs();
@@ -982,7 +1114,7 @@ async function init() {
         );
         showStatus("Запазено за всички посетители.");
       } catch {
-        showStatus("Запазено само при теб. Качи сайта на PHP хостинг, за да се вижда от всички.");
+        showStatus("Не е записано за всички. Ако сайтът е в GitHub Pages, добави Firebase URL в sync-config.js.");
       }
     });
   }
@@ -1015,7 +1147,7 @@ async function init() {
         );
         showStatus("Отстъпките са изчистени за всички.");
       } catch {
-        showStatus("Отстъпките са изчистени само при теб.");
+        showStatus("Не е изчистено за всички. Ако сайтът е в GitHub Pages, добави Firebase URL в sync-config.js.");
       }
     });
   }

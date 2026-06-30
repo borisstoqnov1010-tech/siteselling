@@ -149,7 +149,7 @@
           <p data-content="cs2Description">Страница за CS 2 сървър с IP, Discord, правила, статус и силна първа визия.</p>
           <span class="price" data-price-output>4 €</span>
           <small class="discount-note" data-discount-note></small>
-          <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">Поръчай</a>
+          <button type="button" class="order-btn" data-order-choice="cs2">Поръчай</button>
         </article>
 
         <article class="card service-card" data-service="minecraft" data-price="6">
@@ -158,7 +158,7 @@
           <p data-content="minecraftDescription">Сайт за Minecraft сървър с секции за режимите, снимки, правила и join бутон.</p>
           <span class="price" data-price-output>6 €</span>
           <small class="discount-note" data-discount-note></small>
-          <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">Поръчай</a>
+          <button type="button" class="order-btn" data-order-choice="minecraft">Поръчай</button>
         </article>
 
         <article class="card service-card" data-service="custom" data-price="10">
@@ -167,7 +167,7 @@
           <p data-content="customDescription">Персонален сайт според твоята идея: портфолио, магазин, landing page или проект.</p>
           <span class="price" data-price-output>10 €</span>
           <small class="discount-note" data-discount-note></small>
-          <a href="https://discord.gg/sSkQC2UmkY" class="order-btn" target="_blank" rel="noopener">Поръчай</a>
+          <button type="button" class="order-btn" data-order-choice="custom">Поръчай</button>
         </article>
       </div>
     </section>
@@ -296,6 +296,24 @@
       </form>
     </section>
   </main>
+
+  <div class="checkout-modal is-hidden" data-checkout-modal aria-hidden="true">
+    <div class="checkout-backdrop" data-checkout-close></div>
+    <section class="checkout-dialog" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle">
+      <button class="checkout-close" type="button" data-checkout-close aria-label="Затвори">×</button>
+      <p class="eyebrow">Поръчка</p>
+      <h2 id="checkoutTitle" data-checkout-title>Избери начин за поръчка</h2>
+      <p class="checkout-price" data-checkout-price></p>
+      <p class="checkout-note">
+        За най-сигурно може да минеш през Discord, а ако имаш активен payment link, можеш да платиш веднага онлайн.
+      </p>
+      <div class="checkout-actions">
+        <a class="checkout-pay" href="#" data-pay-now target="_blank" rel="noopener">Плати сега в сайта</a>
+        <a class="checkout-discord" href="https://discord.gg/sSkQC2UmkY" data-discord-order target="_blank" rel="noopener">Поръчай в Discord</a>
+      </div>
+      <p class="checkout-status" data-checkout-status aria-live="polite"></p>
+    </section>
+  </div>
 
   <section class="chatbot" aria-label="AI chatbot">
     <button class="chatbot-toggle" type="button" data-chat-toggle aria-expanded="false">
