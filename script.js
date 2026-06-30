@@ -67,6 +67,8 @@ const checkoutModal = document.querySelector("[data-checkout-modal]");
 const checkoutTitle = document.querySelector("[data-checkout-title]");
 const checkoutPrice = document.querySelector("[data-checkout-price]");
 const checkoutStatus = document.querySelector("[data-checkout-status]");
+const checkoutNameInput = document.querySelector("[data-checkout-name]");
+const checkoutDiscordInput = document.querySelector("[data-checkout-discord]");
 const payNowLink = document.querySelector("[data-pay-now]");
 const paymentMethods = document.querySelector("[data-payment-methods]");
 const payRevolutLink = document.querySelector("[data-pay-revolut]");
@@ -855,6 +857,14 @@ function openCheckout(service) {
     paymentMethods.classList.add("is-hidden");
   }
 
+  if (checkoutNameInput) {
+    checkoutNameInput.value = "";
+  }
+
+  if (checkoutDiscordInput) {
+    checkoutDiscordInput.value = "";
+  }
+
   if (payRevolutLink) {
     payRevolutLink.href = paymentMethodsForService.revolut || "#";
     payRevolutLink.classList.toggle("is-disabled", !paymentMethodsForService.revolut);
@@ -877,6 +887,30 @@ function openCheckout(service) {
   checkoutModal.setAttribute("aria-hidden", "false");
 }
 
+function getCheckoutCustomer() {
+  const name = String(checkoutNameInput?.value || "").trim();
+  const discord = String(checkoutDiscordInput?.value || "").trim();
+
+  if (!name || !discord) {
+    if (checkoutStatus) {
+      checkoutStatus.textContent = "Първо напиши име и Discord, за да продължиш.";
+    }
+
+    if (!name) {
+      checkoutNameInput?.focus();
+    } else {
+      checkoutDiscordInput?.focus();
+    }
+
+    return null;
+  }
+
+  return {
+    name,
+    discord,
+  };
+}
+
 function initCheckout() {
   orderChoiceButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -891,6 +925,10 @@ function initCheckout() {
   if (payNowLink && paymentMethods) {
     payNowLink.addEventListener("click", () => {
       if (payNowLink.classList.contains("is-disabled")) {
+        return;
+      }
+
+      if (!getCheckoutCustomer()) {
         return;
       }
 
@@ -909,6 +947,12 @@ function initCheckout() {
       return;
     }
 
+    const customer = getCheckoutCustomer();
+
+    if (!customer) {
+      return;
+    }
+
     const url = link.href;
     const nextTab = window.open("about:blank", "_blank");
 
@@ -919,6 +963,7 @@ function initCheckout() {
     try {
       await saveOrder({
         ...(currentCheckoutOrder || {}),
+        ...customer,
         source: "Checkout popup",
         paymentMethod,
         description,
