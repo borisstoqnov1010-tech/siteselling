@@ -851,6 +851,168 @@ const translations = {
   },
 };
 
+const staticTextTranslations = {
+  "Услуги": "Services",
+  "Галерия": "Gallery",
+  "Мнения": "Reviews",
+  "Процес": "Process",
+  "Защо аз": "Why me",
+  "Контакт": "Contact",
+  "Сайт": "Site",
+  "Светла тема": "Light theme",
+  "Тъмна тема": "Dark theme",
+  "Виж пакетите": "View packages",
+  "Пиши в Discord": "Message on Discord",
+  "Поръчай": "Order",
+  "Поръчай в Discord": "Order in Discord",
+  "достъпен сайт": "available website",
+  "готови пакета": "ready packages",
+  "Preview идеи за бъдещи сайтове": "Preview ideas for future websites",
+  "Примерни визии, които показват как може да изглежда един готов проект.": "Example visuals that show how a finished project can look.",
+  "Какво казват клиентите": "What clients say",
+  "Пакети": "Packages",
+  "Избери сайт според проекта си": "Choose a website for your project",
+  "Цените могат да се обновяват от admin панела, включително временни отстъпки.": "Prices can be updated from the admin panel, including temporary discounts.",
+  "Лесно от идея до готов сайт": "Easy from idea to finished website",
+  "Пишеш ми": "You message me",
+  "Казваш какъв сайт искаш, какви секции ти трябват и какъв стил харесваш.": "Tell me what website you want, what sections you need and what style you like.",
+  "Правя дизайна": "I design it",
+  "Подреждам страницата, цветовете, бутоните и съдържанието да изглеждат професионално.": "I arrange the page, colors, buttons and content so everything looks professional.",
+  "Получаваш готово": "You get it ready",
+  "Сайтът е responsive, подреден и готов да го показваш на хората си.": "The website is responsive, organized and ready to show to your community.",
+  "Предимства": "Benefits",
+  "Защо да избереш Boris Web Studio?": "Why choose Boris Web Studio?",
+  "Бърза изработка": "Fast delivery",
+  "Не чакаш седмици. Получаваш чист сайт, направен за твоя проект.": "You do not wait for weeks. You get a clean website made for your project.",
+  "Модерен стил": "Modern style",
+  "Тъмен зелен дизайн, ясни секции, добри бутони и силно първо впечатление.": "Dark green design, clear sections, good buttons and a strong first impression.",
+  "Работи на телефон": "Works on mobile",
+  "Страницата се адаптира за телефон, таблет и компютър без странни размествания.": "The page adapts to phone, tablet and desktop without awkward layout shifts.",
+  "Лесни промени": "Easy changes",
+  "Admin страницата позволява да сменяш отстъпки и срокове без да пипаш кода.": "The admin page lets you change discounts and durations without touching code.",
+  "Често задавани въпроси": "Frequently asked questions",
+  "Най-важното преди да поръчаш сайт.": "The important things before ordering a website.",
+  "Колко време отнема изработката?": "How long does it take?",
+  "Обикновено няколко дни, според сложността и колко съдържание трябва да се добави.": "Usually a few days, depending on complexity and how much content needs to be added.",
+  "Какво трябва да изпратя?": "What should I send?",
+  "Име на проекта, цветове, текстове, снимки или лого, Discord линк и пример за стил, който харесваш.": "Project name, colors, texts, images or logo, Discord link and an example style you like.",
+  "Може ли сайтът да работи на телефон?": "Can the website work on mobile?",
+  "Да. Дизайнът е responsive и се адаптира за телефон, таблет и компютър.": "Yes. The design is responsive and adapts to phone, tablet and desktop.",
+  "Може ли после да се правят промени?": "Can changes be made later?",
+  "Готов ли си?": "Ready?",
+  "Направи проекта си да изглежда по-сериозно.": "Make your project look more serious.",
+  "Заявка": "Request",
+  "Изпрати кратка поръчка": "Send a short order request",
+  "Заявката ще се запази в admin панела, за да не се губи информацията.": "The request will be saved in the admin panel so the details are not lost.",
+  "Име": "Name",
+  "Тип сайт": "Website type",
+  "Избери пакет": "Choose package",
+  "Сайт по избор": "Custom website",
+  "Цена": "Price",
+  "Описание": "Description",
+  "Изпрати заявка": "Send request",
+  "Поръчка": "Order",
+  "Избери начин за поръчка": "Choose how to order",
+  "За най-сигурно може да минеш през Discord, а ако имаш активен payment link, можеш да платиш веднага онлайн.": "For the safest flow you can use Discord, or pay online immediately if an active payment link is set.",
+  "Плати сега в сайта": "Pay now on site",
+  "AI помощник": "AI assistant",
+  "Питай за сайт, цена или поръчка": "Ask about website, price or order",
+  "Изпрати": "Send",
+  "Admin панел": "Admin panel",
+  "Защитена зона": "Protected area",
+  "Вход за админ": "Admin login",
+  "Потребител": "User",
+  "Парола": "Password",
+  "Отключи панела": "Unlock panel",
+  "Управление на сайта": "Website management",
+  "Текстове": "Texts",
+  "Снимки": "Images",
+  "Отстъпки": "Discounts",
+  "Поръчки": "Orders",
+  "Акаунти": "Accounts",
+  "Логове": "Logs",
+  "Редакция на текстове и цени": "Edit texts and prices",
+  "Лента най-горе на сайта": "Top site banner",
+  "Цвят на лентата": "Banner color",
+  "Цвят на текста": "Text color",
+  "Запази текстовете": "Save texts",
+  "Качи снимките": "Upload images",
+  "Запази отстъпките": "Save discounts",
+  "Изчисти": "Clear",
+  "Изход": "Logout",
+  "История на заявките": "Order history",
+  "Обнови": "Refresh",
+  "Admin потребители": "Admin users",
+  "Създай акаунт": "Create account",
+  "История на действията": "Action history",
+  "Смени парола": "Change password",
+  "Изтрий": "Delete",
+  "Готова": "Done",
+  "Отказана": "Cancelled",
+};
+
+const staticPlaceholderTranslations = {
+  "Твоето име": "Your name",
+  "Избери пакет": "Choose package",
+  "Какво искаш да има в сайта?": "What do you want the website to include?",
+  "Напиши въпрос...": "Write a question...",
+  "admin или остави празно": "admin or leave empty",
+  "Въведи парола": "Enter password",
+  "Например: -20% отстъпка само тази седмица": "Example: -20% discount this week only",
+  "Нова парола": "New password",
+};
+
+function translateText(value, language) {
+  const clean = String(value || "").trim();
+
+  if (!clean) {
+    return value;
+  }
+
+  if (language === "bg") {
+    return clean;
+  }
+
+  return staticTextTranslations[clean] || clean;
+}
+
+function applyStaticLanguage(language) {
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (!node.textContent.trim()) {
+        return NodeFilter.FILTER_REJECT;
+      }
+
+      const parent = node.parentElement;
+
+      if (!parent || parent.closest("[data-content], [data-announcement-bar], script, style")) {
+        return NodeFilter.FILTER_REJECT;
+      }
+
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+
+  const nodes = [];
+
+  while (walker.nextNode()) {
+    nodes.push(walker.currentNode);
+  }
+
+  nodes.forEach((node) => {
+    node.originalBgText = node.originalBgText || node.textContent.trim();
+    const translated = translateText(node.originalBgText, language);
+    node.textContent = node.textContent.replace(node.textContent.trim(), translated);
+  });
+
+  document.querySelectorAll("[placeholder]").forEach((element) => {
+    element.dataset.bgPlaceholder = element.dataset.bgPlaceholder || element.placeholder;
+    element.placeholder = language === "bg"
+      ? element.dataset.bgPlaceholder
+      : staticPlaceholderTranslations[element.dataset.bgPlaceholder] || element.dataset.bgPlaceholder;
+  });
+}
+
 function setText(selector, text) {
   const element = document.querySelector(selector);
 
@@ -958,6 +1120,7 @@ function applyLanguage(language) {
   setText(".chatbot-messages .chat-message.bot:first-child", t.aiGreeting);
   setPlaceholder('.chatbot-form input[name="message"]', t.aiPlaceholder);
   setText(".chatbot-form button", t.send);
+  applyStaticLanguage(language);
 }
 
 function setLanguage(language) {
