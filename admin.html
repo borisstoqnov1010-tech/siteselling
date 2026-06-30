@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Boris Web Studio</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Boris Web Studio">
+      <img src="favicon.png" alt="" class="brand-mark" data-image="logoImage">
+      <span>Boris Web Studio</span>
+    </a>
+
+    <nav class="main-nav" aria-label="Admin навигация">
+      <a href="index.html">Сайт</a>
+      <a href="index.html#services">Услуги</a>
+      <button class="theme-toggle" type="button" data-theme-toggle>Светла тема</button>
+    </nav>
+  </header>
+
+  <main class="admin-page">
+    <section id="admin" class="section-block">
+      <div class="section-heading">
+        <p class="eyebrow">Защитена зона</p>
+        <h2>Admin панел</h2>
+        <p>Управлявай отстъпките и срока им. Промяната се вижда веднага като preview.</p>
+      </div>
+
+      <form class="admin-login" id="adminLogin">
+        <h3>Вход за админ</h3>
+        <label>
+          Парола
+          <input type="password" id="adminPassword" autocomplete="current-password" placeholder="Въведи парола">
+        </label>
+        <button type="submit">Отключи панела</button>
+        <p class="admin-status" id="passwordStatus" aria-live="polite"></p>
+      </form>
+
+      <div class="admin-panel is-hidden" id="adminPanel">
+        <aside class="admin-intro">
+          <div class="admin-badge">Live pricing</div>
+          <h3>Управление на сайта</h3>
+          <p>
+            Избери таб и редактирай текстове, снимки, цени, отстъпки или заявки.
+            Промените се пазят за всички посетители чрез cloud синхронизация.
+          </p>
+          <p class="sync-status" data-sync-status aria-live="polite">Проверка на синхронизацията...</p>
+        </aside>
+
+        <div class="admin-tabs" role="tablist" aria-label="Admin sections">
+          <button type="button" class="active" data-admin-tab="content">Текстове</button>
+          <button type="button" data-admin-tab="images">Снимки</button>
+          <button type="button" data-admin-tab="discounts">Отстъпки</button>
+          <button type="button" data-admin-tab="orders">Поръчки</button>
+        </div>
+
+        <form class="discount-form" id="discountForm">
+          <div class="content-editor admin-tab-panel" data-tab-panel="content">
+            <h4>Редакция на текстове и цени</h4>
+
+            <label>
+              Малък текст в hero
+              <input type="text" name="heroEyebrow">
+            </label>
+            <label>
+              Главно заглавие
+              <textarea name="heroTitle" rows="2"></textarea>
+            </label>
+            <label>
+              Описание в hero
+              <textarea name="heroText" rows="3"></textarea>
+            </label>
+
+            <div class="content-grid">
+              <label>
+                CS 2 име
+                <input type="text" name="cs2Title">
+              </label>
+              <label>
+                CS 2 badge
+                <input type="text" name="cs2Badge">
+              </label>
+              <label>
+                CS 2 цена
+                <input type="number" min="0" step="0.5" name="cs2Price">
+              </label>
+              <label class="wide-field">
+                CS 2 описание
+                <textarea name="cs2Description" rows="2"></textarea>
+              </label>
+            </div>
+
+            <div class="content-grid">
+              <label>
+                Minecraft име
+                <input type="text" name="minecraftTitle">
+              </label>
+              <label>
+                Minecraft badge
+                <input type="text" name="minecraftBadge">
+              </label>
+              <label>
+                Minecraft цена
+                <input type="number" min="0" step="0.5" name="minecraftPrice">
+              </label>
+              <label class="wide-field">
+                Minecraft описание
+                <textarea name="minecraftDescription" rows="2"></textarea>
+              </label>
+            </div>
+
+            <div class="content-grid">
+              <label>
+                Custom име
+                <input type="text" name="customTitle">
+              </label>
+              <label>
+                Custom badge
+                <input type="text" name="customBadge">
+              </label>
+              <label>
+                Custom цена
+                <input type="number" min="0" step="0.5" name="customPrice">
+              </label>
+              <label class="wide-field">
+                Custom описание
+                <textarea name="customDescription" rows="2"></textarea>
+              </label>
+            </div>
+
+            <div class="content-grid">
+              <label>
+                Галерия 1 заглавие
+                <input type="text" name="galleryOneTitle">
+              </label>
+              <label class="wide-field">
+                Галерия 1 описание
+                <textarea name="galleryOneDescription" rows="2"></textarea>
+              </label>
+              <label>
+                Галерия 2 заглавие
+                <input type="text" name="galleryTwoTitle">
+              </label>
+              <label class="wide-field">
+                Галерия 2 описание
+                <textarea name="galleryTwoDescription" rows="2"></textarea>
+              </label>
+              <label>
+                Галерия 3 заглавие
+                <input type="text" name="galleryThreeTitle">
+              </label>
+              <label class="wide-field">
+                Галерия 3 описание
+                <textarea name="galleryThreeDescription" rows="2"></textarea>
+              </label>
+            </div>
+
+            <div class="content-grid">
+              <label class="wide-field">
+                Мнение 1
+                <textarea name="reviewOneText" rows="2"></textarea>
+              </label>
+              <label>
+                Автор 1
+                <input type="text" name="reviewOneAuthor">
+              </label>
+              <label class="wide-field">
+                Мнение 2
+                <textarea name="reviewTwoText" rows="2"></textarea>
+              </label>
+              <label>
+                Автор 2
+                <input type="text" name="reviewTwoAuthor">
+              </label>
+              <label class="wide-field">
+                Мнение 3
+                <textarea name="reviewThreeText" rows="2"></textarea>
+              </label>
+              <label>
+                Автор 3
+                <input type="text" name="reviewThreeAuthor">
+              </label>
+            </div>
+
+            <button type="submit" class="tab-save-button">Запази текстовете</button>
+          </div>
+
+          <div class="image-manager admin-tab-panel is-hidden" data-tab-panel="images">
+            <h4>Снимки</h4>
+            <p>Качи ново лого, hero снимка или gallery изображения. След upload се виждат от всички посетители.</p>
+
+            <div class="image-grid">
+              <label>
+                Лого / favicon
+                <input type="file" name="logoImage" accept="image/*">
+              </label>
+              <label>
+                Hero снимка
+                <input type="file" name="heroImage" accept="image/*">
+              </label>
+              <label>
+                Галерия 1
+                <input type="file" name="galleryOneImage" accept="image/*">
+              </label>
+              <label>
+                Галерия 2
+                <input type="file" name="galleryTwoImage" accept="image/*">
+              </label>
+              <label>
+                Галерия 3
+                <input type="file" name="galleryThreeImage" accept="image/*">
+              </label>
+            </div>
+
+            <button type="button" class="upload-button" data-upload-images>Качи снимките</button>
+            <p class="admin-status" data-upload-status aria-live="polite"></p>
+          </div>
+
+          <div class="discounts-manager admin-tab-panel is-hidden" data-tab-panel="discounts">
+          <div class="discount-item" data-admin-service="cs2" data-admin-price="4">
+            <div class="discount-header">
+              <h4>CS 2 Server</h4>
+              <span>Base 4 €</span>
+            </div>
+            <label>
+              Отстъпка %
+              <input type="number" min="0" max="100" step="1" name="cs2" value="0">
+            </label>
+            <label>
+              Срок
+              <select name="cs2Duration">
+                <option value="">Без срок</option>
+                <option value="1 ден">1 ден</option>
+                <option value="1 седмица">1 седмица</option>
+                <option value="1 месец">1 месец</option>
+                <option value="custom">Друго</option>
+              </select>
+            </label>
+            <input class="custom-duration is-hidden" type="text" name="cs2CustomDuration" placeholder="Например: до петък">
+            <p class="price-preview" data-price-preview="cs2">Нова цена: 4 €</p>
+          </div>
+
+          <div class="discount-item" data-admin-service="minecraft" data-admin-price="6">
+            <div class="discount-header">
+              <h4>Minecraft Server</h4>
+              <span>Base 6 €</span>
+            </div>
+            <label>
+              Отстъпка %
+              <input type="number" min="0" max="100" step="1" name="minecraft" value="0">
+            </label>
+            <label>
+              Срок
+              <select name="minecraftDuration">
+                <option value="">Без срок</option>
+                <option value="1 ден">1 ден</option>
+                <option value="1 седмица">1 седмица</option>
+                <option value="1 месец">1 месец</option>
+                <option value="custom">Друго</option>
+              </select>
+            </label>
+            <input class="custom-duration is-hidden" type="text" name="minecraftCustomDuration" placeholder="Например: 3 дни">
+            <p class="price-preview" data-price-preview="minecraft">Нова цена: 6 €</p>
+          </div>
+
+          <div class="discount-item" data-admin-service="custom" data-admin-price="10">
+            <div class="discount-header">
+              <h4>Сайт по избор</h4>
+              <span>Base 10 €</span>
+            </div>
+            <label>
+              Отстъпка %
+              <input type="number" min="0" max="100" step="1" name="custom" value="0">
+            </label>
+            <label>
+              Срок
+              <select name="customDuration">
+                <option value="">Без срок</option>
+                <option value="1 ден">1 ден</option>
+                <option value="1 седмица">1 седмица</option>
+                <option value="1 месец">1 месец</option>
+                <option value="custom">Друго</option>
+              </select>
+            </label>
+            <input class="custom-duration is-hidden" type="text" name="customCustomDuration" placeholder="Например: само тази седмица">
+            <p class="price-preview" data-price-preview="custom">Нова цена: 10 €</p>
+          </div>
+
+          <div class="admin-actions">
+            <button type="submit">Запази отстъпките</button>
+            <button type="button" class="ghost-button" id="resetDiscounts">Изчисти</button>
+            <button type="button" class="ghost-button" id="lockAdmin">Изход</button>
+          </div>
+
+          <p class="admin-status" id="adminStatus" aria-live="polite"></p>
+          </div>
+        </form>
+      </div>
+
+      <div class="orders-panel admin-tab-panel is-hidden" id="ordersPanel" data-tab-panel="orders">
+        <div class="orders-header">
+          <div>
+            <p class="eyebrow">Поръчки</p>
+            <h3>История на заявките</h3>
+          </div>
+          <button type="button" class="ghost-button" data-refresh-orders>Обнови</button>
+        </div>
+        <div class="orders-list" data-orders-list>
+          <p class="empty-orders">Няма заредени заявки.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="sync-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
