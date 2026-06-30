@@ -1,6 +1,7 @@
 const STORAGE_KEY = "boris-web-studio-discounts";
 const CONTENT_KEY = "boris-web-studio-content";
 const THEME_KEY = "boris-web-studio-theme";
+const LANGUAGE_KEY = "boris-web-studio-language";
 const HIDDEN_ORDERS_KEY = "boris-web-studio-hidden-orders";
 const LOCAL_ORDER_STATUSES_KEY = "boris-web-studio-local-order-statuses";
 const REMOTE_SETTINGS_URL = "settings.php";
@@ -65,6 +66,7 @@ const syncStatus = document.querySelector("[data-sync-status]");
 const serviceCards = Array.from(document.querySelectorAll(".service-card"));
 const adminItems = Array.from(document.querySelectorAll(".discount-item"));
 const themeButtons = Array.from(document.querySelectorAll("[data-theme-toggle]"));
+const languageButtons = Array.from(document.querySelectorAll("[data-language-toggle]"));
 const chatToggle = document.querySelector("[data-chat-toggle]");
 const chatPanel = document.querySelector("[data-chat-panel]");
 const chatClose = document.querySelector("[data-chat-close]");
@@ -724,12 +726,254 @@ function showStatus(message) {
   }
 }
 
+const translations = {
+  bg: {
+    navServices: "Услуги",
+    navGallery: "Галерия",
+    navReviews: "Мнения",
+    navProcess: "Процес",
+    navWhy: "Защо аз",
+    navContact: "Контакт",
+    navSite: "Сайт",
+    lightTheme: "Светла тема",
+    darkTheme: "Тъмна тема",
+    languageButton: "EN",
+    seePackages: "Виж пакетите",
+    discordWrite: "Пиши в Discord",
+    availableSite: "достъпен сайт",
+    readyPackages: "готови пакета",
+    galleryEyebrow: "Галерия",
+    galleryTitle: "Preview идеи за бъдещи сайтове",
+    galleryText: "Примерни визии, които показват как може да изглежда един готов проект.",
+    reviewsEyebrow: "Мнения",
+    reviewsTitle: "Какво казват клиентите",
+    packagesEyebrow: "Пакети",
+    packagesTitle: "Избери сайт според проекта си",
+    packagesText: "Цените могат да се обновяват от admin панела, включително временни отстъпки.",
+    orderButton: "Поръчай",
+    processEyebrow: "Процес",
+    processTitle: "Лесно от идея до готов сайт",
+    stepOneTitle: "Пишеш ми",
+    stepOneText: "Казваш какъв сайт искаш, какви секции ти трябват и какъв стил харесваш.",
+    stepTwoTitle: "Правя дизайна",
+    stepTwoText: "Подреждам страницата, цветовете, бутоните и съдържанието да изглеждат професионално.",
+    stepThreeTitle: "Получаваш готово",
+    stepThreeText: "Сайтът е responsive, подреден и готов да го показваш на хората си.",
+    whyEyebrow: "Предимства",
+    whyTitle: "Защо да избереш Boris Web Studio?",
+    faqTitle: "Често задавани въпроси",
+    faqText: "Най-важното преди да поръчаш сайт.",
+    contactEyebrow: "Готов ли си?",
+    contactTitle: "Направи проекта си да изглежда по-сериозно.",
+    orderDiscord: "Поръчай в Discord",
+    requestEyebrow: "Заявка",
+    requestTitle: "Изпрати кратка поръчка",
+    requestText: "Заявката ще се запази в admin панела, за да не се губи информацията.",
+    nameLabel: "Име",
+    namePlaceholder: "Твоето име",
+    siteTypeLabel: "Тип сайт",
+    choosePackage: "Избери пакет",
+    customSite: "Сайт по избор",
+    priceLabel: "Цена",
+    descriptionLabel: "Описание",
+    descriptionPlaceholder: "Какво искаш да има в сайта?",
+    submitRequest: "Изпрати заявка",
+    checkoutEyebrow: "Поръчка",
+    checkoutTitle: "Избери начин за поръчка",
+    checkoutNote: "За най-сигурно може да минеш през Discord, а ако имаш активен payment link, можеш да платиш веднага онлайн.",
+    payNow: "Плати сега в сайта",
+    aiTitle: "AI помощник",
+    aiSubtitle: "Питай за сайт, цена или поръчка",
+    aiGreeting: "Здрасти! Питай ме за пакетите, сроковете, отстъпки или как да поръчаш сайт.",
+    aiPlaceholder: "Напиши въпрос...",
+    send: "Изпрати",
+  },
+  en: {
+    navServices: "Services",
+    navGallery: "Gallery",
+    navReviews: "Reviews",
+    navProcess: "Process",
+    navWhy: "Why me",
+    navContact: "Contact",
+    navSite: "Site",
+    lightTheme: "Light theme",
+    darkTheme: "Dark theme",
+    languageButton: "BG",
+    seePackages: "View packages",
+    discordWrite: "Message on Discord",
+    availableSite: "available website",
+    readyPackages: "ready packages",
+    galleryEyebrow: "Gallery",
+    galleryTitle: "Preview ideas for future websites",
+    galleryText: "Example visuals that show how a finished project can look.",
+    reviewsEyebrow: "Reviews",
+    reviewsTitle: "What clients say",
+    packagesEyebrow: "Packages",
+    packagesTitle: "Choose a website for your project",
+    packagesText: "Prices can be updated from the admin panel, including temporary discounts.",
+    orderButton: "Order",
+    processEyebrow: "Process",
+    processTitle: "Easy from idea to finished website",
+    stepOneTitle: "You message me",
+    stepOneText: "Tell me what website you want, what sections you need and what style you like.",
+    stepTwoTitle: "I design it",
+    stepTwoText: "I arrange the page, colors, buttons and content so everything looks professional.",
+    stepThreeTitle: "You get it ready",
+    stepThreeText: "The website is responsive, organized and ready to show to your community.",
+    whyEyebrow: "Benefits",
+    whyTitle: "Why choose Boris Web Studio?",
+    faqTitle: "Frequently asked questions",
+    faqText: "The important things before ordering a website.",
+    contactEyebrow: "Ready?",
+    contactTitle: "Make your project look more serious.",
+    orderDiscord: "Order in Discord",
+    requestEyebrow: "Request",
+    requestTitle: "Send a short order request",
+    requestText: "The request will be saved in the admin panel so the details are not lost.",
+    nameLabel: "Name",
+    namePlaceholder: "Your name",
+    siteTypeLabel: "Website type",
+    choosePackage: "Choose package",
+    customSite: "Custom website",
+    priceLabel: "Price",
+    descriptionLabel: "Description",
+    descriptionPlaceholder: "What do you want the website to include?",
+    submitRequest: "Send request",
+    checkoutEyebrow: "Order",
+    checkoutTitle: "Choose how to order",
+    checkoutNote: "For the safest flow you can use Discord, or pay online immediately if an active payment link is set.",
+    payNow: "Pay now on site",
+    aiTitle: "AI assistant",
+    aiSubtitle: "Ask about website, price or order",
+    aiGreeting: "Hi! Ask me about packages, delivery time, discounts or how to order a website.",
+    aiPlaceholder: "Write a question...",
+    send: "Send",
+  },
+};
+
+function setText(selector, text) {
+  const element = document.querySelector(selector);
+
+  if (element) {
+    element.textContent = text;
+  }
+}
+
+function setAllText(selector, text) {
+  document.querySelectorAll(selector).forEach((element) => {
+    element.textContent = text;
+  });
+}
+
+function setPlaceholder(selector, text) {
+  const element = document.querySelector(selector);
+
+  if (element) {
+    element.placeholder = text;
+  }
+}
+
+function setLabelText(selector, text) {
+  const label = document.querySelector(selector);
+
+  if (!label) {
+    return;
+  }
+
+  const textNode = Array.from(label.childNodes).find((node) => {
+    return node.nodeType === Node.TEXT_NODE && node.textContent.trim();
+  });
+
+  if (textNode) {
+    textNode.textContent = `\n          ${text}\n          `;
+  }
+}
+
+function applyLanguage(language) {
+  const t = translations[language] || translations.bg;
+
+  document.documentElement.lang = language === "en" ? "en" : "bg";
+  languageButtons.forEach((button) => {
+    button.textContent = t.languageButton;
+  });
+
+  setText('.main-nav a[href="#services"]', t.navServices);
+  setText('.main-nav a[href="#gallery"]', t.navGallery);
+  setText('.main-nav a[href="#reviews"]', t.navReviews);
+  setText('.main-nav a[href="#process"]', t.navProcess);
+  setText('.main-nav a[href="#why"]', t.navWhy);
+  setText('.main-nav a[href="#contact"]', t.navContact);
+  setText('.main-nav a[href="index.html"]', t.navSite);
+  setText('.main-nav a[href="index.html#services"]', t.navServices);
+  setText('.hero-actions .btn[href="#services"]', t.seePackages);
+  setText('.hero-actions .secondary-btn', t.discordWrite);
+  setText(".hero-stats div:first-child span", t.availableSite);
+  setText(".hero-stats div:nth-child(3) span", t.readyPackages);
+  setText("#gallery .section-heading .eyebrow", t.galleryEyebrow);
+  setText("#gallery .section-heading h2", t.galleryTitle);
+  setText("#gallery .section-heading p:last-child", t.galleryText);
+  setText("#reviews .section-heading .eyebrow", t.reviewsEyebrow);
+  setText("#reviews .section-heading h2", t.reviewsTitle);
+  setText("#services .section-heading .eyebrow", t.packagesEyebrow);
+  setText("#services .section-heading h2", t.packagesTitle);
+  setText("#services .section-heading p:last-child", t.packagesText);
+  setAllText(".order-btn", t.orderButton);
+  setText("#process .section-heading .eyebrow", t.processEyebrow);
+  setText("#process .section-heading h2", t.processTitle);
+  setText("#process .steps article:first-child h3", t.stepOneTitle);
+  setText("#process .steps article:first-child p", t.stepOneText);
+  setText("#process .steps article:nth-child(2) h3", t.stepTwoTitle);
+  setText("#process .steps article:nth-child(2) p", t.stepTwoText);
+  setText("#process .steps article:nth-child(3) h3", t.stepThreeTitle);
+  setText("#process .steps article:nth-child(3) p", t.stepThreeText);
+  setText("#why .section-heading .eyebrow", t.whyEyebrow);
+  setText("#why .section-heading h2", t.whyTitle);
+  setText("#faq .section-heading h2", t.faqTitle);
+  setText("#faq .section-heading p:last-child", t.faqText);
+  setText("#contact .eyebrow", t.contactEyebrow);
+  setText("#contact h2", t.contactTitle);
+  setText("#contact .btn", t.orderDiscord);
+  setText("#order .section-heading .eyebrow", t.requestEyebrow);
+  setText("#order .section-heading h2", t.requestTitle);
+  setText("#order .section-heading p:last-child", t.requestText);
+  setLabelText('.order-form label:first-child', t.nameLabel);
+  setLabelText('.order-form label:nth-child(3)', t.siteTypeLabel);
+  setLabelText('.order-form label:nth-child(4)', t.priceLabel);
+  setLabelText('.order-form .wide-field', t.descriptionLabel);
+  setText('.order-form button[type="submit"]', t.submitRequest);
+  setText('.order-form select[name="service"] option[value=""]', t.choosePackage);
+  setText('.order-form select[name="service"] option[data-service-key="custom"]', t.customSite);
+  setPlaceholder('.order-form input[name="name"]', t.namePlaceholder);
+  setPlaceholder('.order-form input[name="budget"]', t.choosePackage);
+  setPlaceholder('.order-form textarea[name="description"]', t.descriptionPlaceholder);
+  setText(".checkout-dialog .eyebrow", t.checkoutEyebrow);
+  setText("[data-checkout-title]", t.checkoutTitle);
+  setText(".checkout-note", t.checkoutNote);
+  setLabelText(".checkout-fields label:first-child", t.nameLabel);
+  setText("[data-pay-now]", t.payNow);
+  setText("[data-discord-order]", t.orderDiscord);
+  setPlaceholder("[data-checkout-name]", t.namePlaceholder);
+  setText(".chatbot-header strong", t.aiTitle);
+  setText(".chatbot-header span", t.aiSubtitle);
+  setText(".chatbot-messages .chat-message.bot:first-child", t.aiGreeting);
+  setPlaceholder('.chatbot-form input[name="message"]', t.aiPlaceholder);
+  setText(".chatbot-form button", t.send);
+}
+
+function setLanguage(language) {
+  localStorage.setItem(LANGUAGE_KEY, language);
+  applyLanguage(language);
+  setTheme(localStorage.getItem(THEME_KEY) || "dark");
+}
+
 function setTheme(theme) {
   document.documentElement.dataset.theme = theme;
   localStorage.setItem(THEME_KEY, theme);
+  const language = localStorage.getItem(LANGUAGE_KEY) || "bg";
+  const t = translations[language] || translations.bg;
 
   themeButtons.forEach((button) => {
-    button.textContent = theme === "light" ? "Тъмна тема" : "Светла тема";
+    button.textContent = theme === "light" ? t.darkTheme : t.lightTheme;
   });
 }
 
@@ -1952,11 +2196,18 @@ function initAccounts() {
 }
 
 async function init() {
+  setLanguage(localStorage.getItem(LANGUAGE_KEY) || "bg");
   setTheme(localStorage.getItem(THEME_KEY) || "dark");
 
   themeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+    });
+  });
+
+  languageButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setLanguage((localStorage.getItem(LANGUAGE_KEY) || "bg") === "bg" ? "en" : "bg");
     });
   });
 
