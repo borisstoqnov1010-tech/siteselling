@@ -894,9 +894,53 @@ footer {
   width: min(1120px, 100%);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 0.8fr 1.4fr;
+  grid-template-columns: 1fr;
   gap: 24px;
   padding: 28px;
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.admin-tabs button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-tabs button.active {
+  color: #031008;
+  border-color: var(--line-strong);
+  background: linear-gradient(135deg, var(--green-2), var(--green));
+}
+
+.admin-tab-panel {
+  animation: tabFade 180ms ease both;
+}
+
+@keyframes tabFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .orders-panel {
@@ -963,6 +1007,11 @@ footer {
   gap: 16px;
 }
 
+.discounts-manager {
+  display: grid;
+  gap: 16px;
+}
+
 .content-editor,
 .image-manager {
   display: grid;
@@ -990,6 +1039,17 @@ footer {
 }
 
 .upload-button {
+  min-height: 48px;
+  border: 0;
+  border-radius: var(--radius);
+  color: #031008;
+  background: linear-gradient(135deg, var(--green-2), var(--green));
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.tab-save-button {
   min-height: 48px;
   border: 0;
   border-radius: var(--radius);

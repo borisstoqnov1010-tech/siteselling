@@ -64,6 +64,8 @@ const ordersList = document.querySelector("[data-orders-list]");
 const refreshOrdersButton = document.querySelector("[data-refresh-orders]");
 const uploadImagesButton = document.querySelector("[data-upload-images]");
 const uploadStatus = document.querySelector("[data-upload-status]");
+const adminTabButtons = Array.from(document.querySelectorAll("[data-admin-tab]"));
+const adminTabPanels = Array.from(document.querySelectorAll("[data-tab-panel]"));
 const IMAGE_KEYS = ["logoImage", "heroImage", "galleryOneImage", "galleryTwoImage", "galleryThreeImage"];
 
 function readJson(key, fallback = {}) {
@@ -423,13 +425,10 @@ function unlockAdmin() {
 
   adminLogin.classList.add("is-hidden");
   adminPanel.classList.remove("is-hidden");
-  if (ordersPanel) {
-    ordersPanel.classList.remove("is-hidden");
-    loadOrders();
-  }
   passwordStatus.textContent = "";
   adminPassword.value = "";
   sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
+  activateAdminTab("content");
 }
 
 function lockAdmin() {
@@ -444,6 +443,32 @@ function lockAdmin() {
   }
   showStatus("");
   sessionStorage.removeItem(ADMIN_SESSION_KEY);
+}
+
+function activateAdminTab(tabName) {
+  adminTabButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.adminTab === tabName);
+  });
+
+  adminTabPanels.forEach((panel) => {
+    panel.classList.toggle("is-hidden", panel.dataset.tabPanel !== tabName);
+  });
+
+  if (tabName === "orders") {
+    loadOrders();
+  }
+}
+
+function initAdminTabs() {
+  if (adminTabButtons.length === 0) {
+    return;
+  }
+
+  adminTabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      activateAdminTab(button.dataset.adminTab);
+    });
+  });
 }
 
 function resetDiscounts() {
@@ -757,6 +782,7 @@ async function init() {
   initChatbot();
   initOrders();
   initImageUploads();
+  initAdminTabs();
 
   const sharedState = await loadSharedState();
   const content = sharedState.content;

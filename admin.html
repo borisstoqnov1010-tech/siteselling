@@ -42,15 +42,22 @@
       <div class="admin-panel is-hidden" id="adminPanel">
         <aside class="admin-intro">
           <div class="admin-badge">Live pricing</div>
-          <h3>Отстъпки и срокове</h3>
+          <h3>Управление на сайта</h3>
           <p>
-            Задай процент, избери срок и виж новата цена преди да запазиш.
-            Настройките се пазят в този браузър и се показват на главния сайт.
+            Избери таб и редактирай текстове, снимки, цени, отстъпки или заявки.
+            Промените се пазят за всички посетители, когато сайтът е качен на PHP хостинг.
           </p>
         </aside>
 
+        <div class="admin-tabs" role="tablist" aria-label="Admin sections">
+          <button type="button" class="active" data-admin-tab="content">Текстове</button>
+          <button type="button" data-admin-tab="images">Снимки</button>
+          <button type="button" data-admin-tab="discounts">Отстъпки</button>
+          <button type="button" data-admin-tab="orders">Поръчки</button>
+        </div>
+
         <form class="discount-form" id="discountForm">
-          <div class="content-editor">
+          <div class="content-editor admin-tab-panel" data-tab-panel="content">
             <h4>Редакция на текстове и цени</h4>
 
             <label>
@@ -176,9 +183,11 @@
                 <input type="text" name="reviewThreeAuthor">
               </label>
             </div>
+
+            <button type="submit" class="tab-save-button">Запази текстовете</button>
           </div>
 
-          <div class="image-manager">
+          <div class="image-manager admin-tab-panel is-hidden" data-tab-panel="images">
             <h4>Снимки</h4>
             <p>Качи ново лого, hero снимка или gallery изображения. След upload се виждат от всички посетители.</p>
 
@@ -209,6 +218,7 @@
             <p class="admin-status" data-upload-status aria-live="polite"></p>
           </div>
 
+          <div class="discounts-manager admin-tab-panel is-hidden" data-tab-panel="discounts">
           <div class="discount-item" data-admin-service="cs2" data-admin-price="4">
             <div class="discount-header">
               <h4>CS 2 Server</h4>
@@ -285,10 +295,11 @@
           </div>
 
           <p class="admin-status" id="adminStatus" aria-live="polite"></p>
+          </div>
         </form>
       </div>
 
-      <div class="orders-panel is-hidden" id="ordersPanel">
+      <div class="orders-panel admin-tab-panel is-hidden" id="ordersPanel" data-tab-panel="orders">
         <div class="orders-header">
           <div>
             <p class="eyebrow">Поръчки</p>
