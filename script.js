@@ -79,27 +79,56 @@ function readJson(key, fallback = {}) {
   }
 }
 
+function getCloudSettingsUrl() {
+  const databaseUrl = String(window.BORIS_SYNC_DATABASE_URL || "").trim().replace(/\/+$/, "");
+
+  if (!databaseUrl) {
+    return "";
+  }
+
+  return `${databaseUrl}/settings.json`;
+}
+
+async function requestJson(url, options = {}) {
+  const response = await fetch(url, {
+    cache: "no-store",
+    ...options,
+  });
+
+  if (!response.ok) {
+    throw new Error("Request failed");
+  }
+
+  return response.json();
+}
+
+function normalizeSharedState(data = {}) {
+  const settings = data || {};
+
+  return {
+    content: {
+      ...defaultContent,
+      ...(settings.content || {}),
+    },
+    discounts: settings.discounts || {},
+    updatedAt: settings.updatedAt || "",
+    isShared: true,
+  };
+}
+
 async function loadSharedState() {
+  const cloudSettingsUrl = getCloudSettingsUrl();
+
+  if (cloudSettingsUrl) {
+    try {
+      const data = await requestJson(`${cloudSettingsUrl}?v=${Date.now()}`);
+      return normalizeSharedState(data);
+    } catch {}
+  }
+
   try {
-    const response = await fetch(`${REMOTE_SETTINGS_URL}?v=${Date.now()}`, {
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error("Settings request failed");
-    }
-
-    const data = await response.json();
-
-    return {
-      content: {
-        ...defaultContent,
-        ...(data.content || {}),
-      },
-      discounts: data.discounts || {},
-      updatedAt: data.updatedAt || "",
-      isShared: true,
-    };
+    const data = await requestJson(`${REMOTE_SETTINGS_URL}?v=${Date.now()}`);
+    return normalizeSharedState(data);
   } catch {
     return {
       content: getContent(),
@@ -110,6 +139,29 @@ async function loadSharedState() {
 }
 
 async function saveSharedState(content, discounts) {
+  const cloudSettingsUrl = getCloudSettingsUrl();
+
+  if (cloudSettingsUrl) {
+    const settings = {
+      content,
+      discounts,
+      updatedAt: new Date().toISOString(),
+    };
+
+    await requestJson(cloudSettingsUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(settings),
+    });
+
+    return {
+      ok: true,
+      settings,
+    };
+  }
+
   const response = await fetch(REMOTE_SETTINGS_URL, {
     method: "POST",
     headers: {
