@@ -1,6 +1,7 @@
 const STORAGE_KEY = "boris-web-studio-discounts";
 const CONTENT_KEY = "boris-web-studio-content";
 const THEME_KEY = "boris-web-studio-theme";
+const HIDDEN_ORDERS_KEY = "boris-web-studio-hidden-orders";
 const REMOTE_SETTINGS_URL = "settings.php";
 const SETTINGS_SYNC_INTERVAL = 8000;
 const ADMIN_PASSWORD = "kuchki55";
@@ -1352,6 +1353,16 @@ function saveLocalLogs(logs) {
   localStorage.setItem("boris-web-studio-admin-logs", JSON.stringify(logs.slice(0, 100)));
 }
 
+function getHiddenOrderIds() {
+  return readJson(HIDDEN_ORDERS_KEY, []);
+}
+
+function hideOrderLocally(orderId) {
+  const hiddenIds = new Set(getHiddenOrderIds());
+  hiddenIds.add(orderId);
+  localStorage.setItem(HIDDEN_ORDERS_KEY, JSON.stringify(Array.from(hiddenIds)));
+}
+
 async function addAdminLog(action, details = "") {
   const log = {
     action,
@@ -1428,7 +1439,11 @@ async function loadOrders() {
       orders = Array.isArray(data.orders) ? data.orders : [];
     }
 
-    orders = orders.filter((order) => !order.deleted && order.status !== "deleted");
+    const hiddenOrderIds = new Set(getHiddenOrderIds());
+    orders = orders.filter((order) => {
+      const orderId = order.storageId || order.id;
+      return !order.deleted && order.status !== "deleted" && !hiddenOrderIds.has(orderId);
+    });
     orders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
     if (orders.length === 0) {
@@ -1693,6 +1708,8 @@ function initOrders() {
 
       try {
         if (deleteButton) {
+          hideOrderLocally(orderId);
+          button.closest("[data-order-card]")?.remove();
           await deleteOrder(orderId);
           await addAdminLog("Изтрита поръчка", orderId).catch(() => {});
         } else {
@@ -1703,6 +1720,11 @@ function initOrders() {
         await loadOrders();
       } catch {
         button.disabled = false;
+
+        if (deleteButton) {
+          return;
+        }
+
         const oldError = ordersList.querySelector("[data-orders-error]");
 
         if (oldError) {
