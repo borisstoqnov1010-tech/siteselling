@@ -962,6 +962,88 @@ const staticTextTranslations = {
   "Изтрий": "Delete",
   "Готова": "Done",
   "Отказана": "Cancelled",
+  "Нова": "New",
+  "Зареждане...": "Loading...",
+  "Все още няма заявки.": "There are no requests yet.",
+  "Няма създадени акаунти.": "No accounts created.",
+  "Още няма логове.": "No logs yet.",
+  "Няма заредени заявки.": "No loaded requests.",
+  "Няма заредени акаунти.": "No loaded accounts.",
+  "Няма заредени логове.": "No loaded logs.",
+  "Име:": "Name:",
+  "Discord:": "Discord:",
+  "Бюджет:": "Budget:",
+  "Източник:": "Source:",
+  "Плащане:": "Payment:",
+  "Описание:": "Description:",
+  "Дата:": "Date:",
+  "Създаден:": "Created:",
+  "Последна промяна:": "Last change:",
+  "Потребител:": "User:",
+  "Детайли:": "Details:",
+  "Страница:": "Page:",
+  "Език:": "Language:",
+  "Браузър:": "Browser:",
+  "Нова цена:": "New price:",
+  "Без срок": "No duration",
+  "1 ден": "1 day",
+  "1 седмица": "1 week",
+  "1 месец": "1 month",
+  "Друго": "Other",
+  "Отстъпка %": "Discount %",
+  "Срок": "Duration",
+  "Новa заявка": "New request",
+  "Нова заявка": "New request",
+  "Base": "Base",
+  "Малък текст в hero": "Small hero text",
+  "Главно заглавие": "Main title",
+  "Описание в hero": "Hero description",
+  "CS 2 име": "CS 2 name",
+  "CS 2 цена": "CS 2 price",
+  "CS 2 описание": "CS 2 description",
+  "Minecraft име": "Minecraft name",
+  "Minecraft цена": "Minecraft price",
+  "Minecraft описание": "Minecraft description",
+  "Custom име": "Custom name",
+  "Custom цена": "Custom price",
+  "Custom описание": "Custom description",
+  "Галерия 1 заглавие": "Gallery 1 title",
+  "Галерия 1 описание": "Gallery 1 description",
+  "Галерия 2 заглавие": "Gallery 2 title",
+  "Галерия 2 описание": "Gallery 2 description",
+  "Галерия 3 заглавие": "Gallery 3 title",
+  "Галерия 3 описание": "Gallery 3 description",
+  "Мнение 1": "Review 1",
+  "Мнение 2": "Review 2",
+  "Мнение 3": "Review 3",
+  "Автор 1": "Author 1",
+  "Автор 2": "Author 2",
+  "Автор 3": "Author 3",
+  "Лого / favicon": "Logo / favicon",
+  "Hero снимка": "Hero image",
+  "Галерия 1": "Gallery 1",
+  "Галерия 2": "Gallery 2",
+  "Галерия 3": "Gallery 3",
+  "Качи ново лого, hero снимка или gallery изображения. След upload се виждат от всички посетители.": "Upload a new logo, hero image or gallery images. After upload they are visible to all visitors.",
+  "Избери таб и редактирай текстове, снимки, цени, отстъпки или заявки. Промените се пазят за всички посетители чрез cloud синхронизация.": "Choose a tab and edit texts, images, prices, discounts or requests. Changes are saved for all visitors through cloud sync.",
+  "Проверка на синхронизацията...": "Checking sync...",
+  "Управлявай отстъпките и срока им. Промяната се вижда веднага като preview.": "Manage discounts and their duration. The change is visible immediately as a preview.",
+  "Създай акаунт": "Create account",
+  "Въведи нова парола.": "Enter a new password.",
+  "Акаунтът е създаден и вече може да се ползва.": "The account was created and can now be used.",
+  "Паролата е сменена.": "The password was changed.",
+  "Акаунтът е изтрит.": "The account was deleted.",
+  "Грешен потребител или парола.": "Wrong username or password.",
+  "Запазено за всички посетители.": "Saved for all visitors.",
+  "Отстъпките са изчистени за всички.": "Discounts were cleared for all visitors.",
+  "Преглед преди запазване.": "Preview before saving.",
+  "© 2026 Всички права запазени.": "© 2026 All rights reserved.",
+  "Заявката е изпратена успешно.": "The request was sent successfully.",
+  "Изпращане...": "Sending...",
+  "Първо избери пакет, за да се зададе цената.": "Choose a package first so the price can be set.",
+  "Първо напиши име и Discord, за да продължиш.": "Enter your name and Discord first to continue.",
+  "Избери Revolut или PayPal, за да продължиш към плащане.": "Choose Revolut or PayPal to continue to payment.",
+  "Натисни плащане и избери Revolut или PayPal. Discord остава вариант, ако искаш първо да уточним проекта.": "Click payment and choose Revolut or PayPal. Discord remains an option if you want to discuss the project first.",
   "Бързи, модерни и зелени уебсайтове": "Fast, modern and green websites",
   "Сайт, който изглежда сериозно още от първия клик.": "A website that looks serious from the first click.",
   "Правя чисти, responsive сайтове за CS 2, Minecraft, лични проекти и малки бизнеси. Получаваш дизайн, структура и готов линк за поръчки през Discord.": "I build clean, responsive websites for CS 2, Minecraft, personal projects and small businesses. You get design, structure and a ready order flow through Discord.",
@@ -995,6 +1077,13 @@ const staticPlaceholderTranslations = {
   "Нова парола": "New password",
 };
 
+const englishToBgTranslations = Object.fromEntries(
+  Object.entries(staticTextTranslations).map(([bg, en]) => [en, bg])
+);
+const englishToBgPlaceholders = Object.fromEntries(
+  Object.entries(staticPlaceholderTranslations).map(([bg, en]) => [en, bg])
+);
+
 function translateText(value, language) {
   const clean = String(value || "").trim();
 
@@ -1003,7 +1092,7 @@ function translateText(value, language) {
   }
 
   if (language === "bg") {
-    return clean;
+    return englishToBgTranslations[clean] || clean;
   }
 
   return staticTextTranslations[clean] || clean;
@@ -1040,9 +1129,11 @@ function applyStaticLanguage(language) {
 
   document.querySelectorAll("[placeholder]").forEach((element) => {
     element.dataset.bgPlaceholder = element.dataset.bgPlaceholder || element.placeholder;
+    const bgPlaceholder = englishToBgPlaceholders[element.dataset.bgPlaceholder] || element.dataset.bgPlaceholder;
+    element.dataset.bgPlaceholder = bgPlaceholder;
     element.placeholder = language === "bg"
-      ? element.dataset.bgPlaceholder
-      : staticPlaceholderTranslations[element.dataset.bgPlaceholder] || element.dataset.bgPlaceholder;
+      ? bgPlaceholder
+      : staticPlaceholderTranslations[bgPlaceholder] || bgPlaceholder;
   });
 }
 
@@ -1983,6 +2074,7 @@ async function loadOrders() {
 
     if (orders.length === 0) {
       ordersList.innerHTML = '<p class="empty-orders">Все още няма заявки.</p>';
+      applyLanguage(localStorage.getItem(LANGUAGE_KEY) || "bg");
       return;
     }
 
@@ -2010,8 +2102,10 @@ async function loadOrders() {
         </article>
       `;
     }).join("");
+    applyLanguage(localStorage.getItem(LANGUAGE_KEY) || "bg");
   } catch {
     ordersList.innerHTML = '<p class="empty-orders">Не успях да заредя заявките. Провери Firebase URL/rules или PHP хостинга.</p>';
+    applyLanguage(localStorage.getItem(LANGUAGE_KEY) || "bg");
   }
 }
 
@@ -2027,6 +2121,7 @@ async function loadAccounts() {
 
     if (accounts.length === 0) {
       accountsList.innerHTML = '<p class="empty-orders">Няма създадени акаунти.</p>';
+      applyLanguage(localStorage.getItem(LANGUAGE_KEY) || "bg");
       return;
     }
 
@@ -2051,8 +2146,10 @@ async function loadAccounts() {
         </article>
       `;
     }).join("");
+    applyLanguage(localStorage.getItem(LANGUAGE_KEY) || "bg");
   } catch {
     accountsList.innerHTML = '<p class="empty-orders">Не успях да заредя акаунтите. Провери Firebase rules.</p>';
+    applyLanguage(localStorage.getItem(LANGUAGE_KEY) || "bg");
   }
 }
 
@@ -2077,6 +2174,7 @@ async function loadLogs() {
 
     if (logs.length === 0) {
       logsList.innerHTML = '<p class="empty-orders">Още няма логове.</p>';
+      applyLanguage(localStorage.getItem(LANGUAGE_KEY) || "bg");
       return;
     }
 
@@ -2095,8 +2193,10 @@ async function loadLogs() {
         </article>
       `;
     }).join("");
+    applyLanguage(localStorage.getItem(LANGUAGE_KEY) || "bg");
   } catch {
     logsList.innerHTML = '<p class="empty-orders">Не успях да заредя логовете. Провери Firebase rules.</p>';
+    applyLanguage(localStorage.getItem(LANGUAGE_KEY) || "bg");
   }
 }
 
